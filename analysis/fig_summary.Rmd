@@ -1,0 +1,79 @@
+---
+title: "The summary plot"
+output: html_notebook
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(cowplot)
+devtools::load_all()
+
+annotation <- MetadataPath("annotation.csv") %>% read_csv() %$% setNames(l4, cell)
+neuron_type_per_type <- ifelse(grepl("L[2-6].+", unique(annotation)), "Excitatory", "Inhibitory") %>% 
+  setNames(unique(annotation))
+type_order <- names(neuron_type_per_type)[order(neuron_type_per_type, names(neuron_type_per_type))]
+```
+
+```{r, message=FALSE, warning=FALSE}
+all_stat_df <- read_csv(OutputPath("total_ranking", "go.csv")) %>% 
+  rbind(read_csv(OutputPath("total_ranking", "type_distance.csv"))) %>% 
+  mutate(AffectionLevel=as.integer(pmax((Rank < 1.1) * 3, HighlyAffected * 2, Affected * 1)))
+
+write_csv(all_stat_df, OutputPath("total_ranking", "total.csv"))
+
+stat_weights = c(Similarity=1.0, CellNumber=0.66, GWAS=0.66, DENumber=0.33, GONumber=0.33, EPEnrichment=0.33)
+
+aggr_type_score <- all_stat_df %>% split(.$Type) %>% 
+  sapply(function(x) sum(x$AffectionLevel * stat_weights[x$StatType])) %>% 
+  split(neuron_type_per_type[names(.)]) %>% lapply(sort, decreasing=T) %>% 
+  Reduce(c, .)
+
+all_stat_df %<>% 
+  mutate(Type=factor(Type, levels=names(aggr_type_score)), 
+         StatType=factor(StatType, levels=names(sort(stat_weights))),
+         AffectionLevel=factor(AffectionLevel, levels=3:0))
+```
+
+```{r, fig.width=8, fig.height=4.5, message=FALSE}
+stat_aliases <- c(EPEnrichment="Epilepsy\nenrichment", DENumber="Num. of\nDE genes", GONumber="Num. of\nGO pathways",
+                  CellNumber="Num. of\ncells", GWAS="GWAS\nenrichment", Similarity="Expression\nsimilarity")
+
+gg_stat_weights <- ggplot(tibble(N=names(stat_weights), V=as.character(stat_weights) %>% factor(levels=unique(.)))) +
+  geom_tile(aes(y=factor(N, levels=rev(N)), x=1, fill=V)) +
+  scale_fill_brewer("Stat weight", palette="Blues", direction=-1) +
+  guides(fill=guide_legend(direction="horizontal", title.position="top", label.position="bottom", reverse=T)) +
+  theme(legend.spacing.x=unit(0, "pt"))
+
+gg_score <- ggplot(tibble(N=names(aggr_type_score), V=aggr_type_score)) + 
+  geom_tile(aes(x=factor(N, levels=N), y=1, fill=V)) +
+  guides(fill=guide_colorbar(direction="horizontal", title.position="top")) +
+  scale_fill_distiller("Score", palette="Greens", direction="rev") +
+  scale_y_continuous(expand=c(0, 0)) +
+  theme(legend.key.width=unit(14, "pt"))
+
+gg_ranks <- ggplot(all_stat_df) + 
+  geom_tile(aes(x=Type, y=StatType, fill=AffectionLevel), alpha=stat_weights[as.character(all_stat_df$StatType)]) +
+  gNtVline(neuron_type_per_type, color="black", linetype=1) +
+  guides(fill=guide_legend(direction="horizontal", title.position="top", label.position="bottom", reverse=T)) +
+  scale_fill_manual("Affection level", values=c("#e34a33", "#fdbb84", "#fee8c8", "gray")) +
+  scale_y_discrete(expand=c(0, 0), name="Metric", labels=stat_aliases[levels(all_stat_df$StatType)]) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), panel.grid=element_blank(), 
+        legend.spacing.x=unit(0, "pt"), panel.background=element_rect(fill="gray")) # , axis.title.x=element_blank()
+
+plot_grid(
+  ggdraw(gg_ranks + theme(legend.position="none", plot.margin=margin(r=10, t=10)) +
+         draw_plot(gg_stat_weights + theme_nothing(), 
+                   x=length(type_order) - 0.25, y=-5.9, height=6.25, width=1, vjust=-1) +
+         draw_plot(gg_score + theme_nothing(), 
+                   x=0.25, y=6.25, height=0.3, width=length(type_order) - 0.5, vjust=-1)),
+  plot_grid(
+    plot_grid(get_legend(gg_score), get_legend(gg_ranks), get_legend(gg_stat_weights), 
+              ncol=1, align="v"),
+    ggplot() + theme_nothing(), ncol=1, rel_heights=c(1, 0.75)
+  ),
+  nrow=1, rel_widths=c(1, 0.2), align="vh", axis="tb"
+)
+
+ggsave(OutputPath("all_differences.pdf"))
+```
