@@ -1,0 +1,462 @@
+---
+title: "Overview of all datasets"
+output: html_notebook
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, message=FALSE, warning=FALSE}
+# library(Epilepsy19)
+library(ggplot2)
+library(magrittr)
+library(Matrix)
+library(pbapply)
+library(conos)
+library(CellAnnotatoR)
+library(readr)
+library(tidyverse)
+library(pheatmap)
+
+theme_set(theme_bw())
+
+devtools::load_all()
+
+outPath <- function(...) OutputPath("overview", ...)
+theme_borders <- theme(panel.border=element_blank(), axis.line=element_line(size=0.5, color = "black"))
+```
+
+## Load data
+
+```{r, message=FALSE, warning=FALSE}
+con <- read_rds(CachePath("con_filt_cells.rds"))
+
+sample_info <- MetadataPath("sample_info.csv") %>% read_csv()
+sex_per_sample <- sample_info %$% setNames(Sex, Alias)
+```
+
+```{r, message=FALSE}
+cm_per_samp_raw <- lapply(con$samples, function(p2) p2$misc$rawCounts)
+cm_per_samp_raw$NeuNNeg <- CachePath("count_matrices.rds") %>% read_rds() %>% .$NeuN %>% t()
+
+med_umis_per_samp <- pblapply(cm_per_samp_raw, Matrix::rowSums) %>% sapply(median)
+med_genes_per_samp <- pblapply(cm_per_samp_raw, getNGenes) %>% sapply(median)
+n_cells_per_samp <- sapply(cm_per_samp_raw, nrow)
+
+mean(med_genes_per_samp)
+```
+
+```{r, message=FALSE}
+cm_merged <- con$getJointCountMatrix()
+
+sample_per_cell <- con$getDatasetPerCell()
+condition_per_sample <- ifelse(grepl("E", levels(sample_per_cell)), "epilepsy", "control") %>% 
+  setNames(levels(sample_per_cell))
+
+annotation_by_level <- read_csv(MetadataPath("annotation.csv")) %>% 
+  filter(cell %in% rownames(cm_merged))
+
+annotation_by_level %<>% .[, 2:ncol(.)] %>% lapply(setNames, annotation_by_level$cell)
+annotation <- as.factor(annotation_by_level$l4)
+
+neuron_type_per_type <- ifelse(grepl("L[2-6].+", unique(annotation)), "Excitatory", "Inhibitory") %>% 
+  setNames(unique(annotation))
+
+samp_per_cond <- sample_info$Alias %>% split(condition_per_sample[.])
+
+type_order <- names(neuron_type_per_type)[order(neuron_type_per_type, names(neuron_type_per_type))]
+annotation <- factor(annotation, levels=type_order)
+
+condition_colors <- c("#0571b0", "#ca0020")
+```
+
+## Annotation hierarchy
+
+```{r, fig.width=7, fig.height=10, message=FALSE}
+parseMarkerFile(MetadataPath("neuron_markers.txt")) %>% 
+  createClassificationTree() %>% plotTypeHierarchy()
+ggsave(outPath("cell_type_hierarchy.pdf"))
+```
+
+## Joint embedding
+
+### Annotation
+
+```{r, fig.width=7, fig.height=7, message=F}
+gg_annot <- con$plotGraph(groups=annotation, shuffle.colors=T, font.size=c(2, 3), 
+                             size=0.1, alpha=0.05, raster=T, raster.dpi=120) +
+  theme(panel.grid=element_blank())
+
+gg_annot
+ggsave(outPath("annotation_large.pdf"))
+```
+
+```{r, fig.width=8, fig.height=8, message=FALSE, warning=FALSE}
+ggs <- plotAnnotationByLevels(con$embedding, annotation_by_level, size=0.1, font.size=c(2, 3), shuffle.colors=T,
+                       raster=T, raster.dpi=120, raster.width=4, raster.height=4, build.panel=F) %>% 
+  lapply(`+`, theme(plot.title=element_blank(), plot.margin=margin()))
+
+cowplot::plot_grid(plotlist=ggs, ncol=2)
+ggsave(outPath("hierarchical_annotation.pdf"), cowplot::plot_grid(plotlist=ggs, ncol=1), width=4, height=16)
+```
+
+```{r, fig.width=8, fig.height=15, message=FALSE, warning=FALSE}
+gg_ind_anns <- lapply(samp_per_cond, function(ns)
+  conos:::plotSamples(con$samples[ns] %>% setNames(gsub("C", "control ", gsub("E", "epilepsy ", names(.)))), 
+                      groups=annotation, embedding.type="UMAP", ncol=2, size=0.1, adj.list=list(theme(plot.margin=margin())),
+                      font.size=c(1.5, 2.5), raster=T, raster.dpi=120, raster.width=4, raster.height=3))
+
+ggsave(outPath("individual_annotation_cnt.pdf"), gg_ind_anns$control, width=8, height=15)
+ggsave(outPath("individual_annotation_ep.pdf"), gg_ind_anns$epilepsy, width=8, height=15)
+
+gg_ind_anns
+```
+
+### Groups
+
+Condition:
+
+```{r, fig.width=7, fig.height=7, message=FALSE, warning=FALSE}
+condition_per_cell <- condition_per_sample[as.character(con$getDatasetPerCell())] %>% 
+  setNames(names(sample_per_cell))
+con$plotGraph(groups=condition_per_cell, mark.groups=F, size=0.05, alpha=0.05, show.legend=T, 
+                 legend.pos=c(1,1), raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+  gg_annot$layers[[2]] +
+  scale_size_continuous(range=c(2, 3), trans='identity', guide='none') +
+  scale_color_manual(values=condition_colors) +
+  guides(color=guide_legend(override.aes=list(size=2, alpha=1), title="Condition")) +
+  theme(panel.grid=element_blank())
+
+ggsave(outPath("condition_per_cell.pdf"))
+```
+
+~~Age:~~
+
+~~Age information was hidden for the data security purposes~~
+
+```{r, fig.width=7, fig.height=7, message=FALSE, warning=FALSE, eval=FALSE}
+age_per_cell <- age_per_sample[sample_per_cell] %>% setNames(names(sample_per_cell))
+age_subsets <- age_per_cell %>% split(condition_per_cell[names(.)]) %>% c(list(all=age_per_cell))
+ggs_age <- lapply(names(age_subsets), function(n) {
+  t.g <- con$plotGraph(colors=age_subsets[[n]], color.range=range(age_per_cell), size=0.05, 
+                          alpha=0.1, plot.na=F, show.legend=T, legend.pos=c(1,1), 
+                          raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+    gg_annot$layers[[2]] +
+    scale_size_continuous(range=c(2, 3), trans='identity', guide='none') +
+    scale_color_distiller("Age", palette="RdYlBu") +
+    theme(panel.grid=element_blank())
+  ggsave(outPath(paste0("age_", n, ".pdf")), t.g)
+  t.g
+})
+
+ggs_age
+```
+
+Sex:
+
+```{r, fig.width=7, fig.height=7, message=FALSE, warning=FALSE}
+sex_per_cell <- sex_per_sample[sample_per_cell] %>% setNames(names(sample_per_cell))
+sex_subsets <- sex_per_cell %>% split(condition_per_cell[names(.)]) %>% c(list(all=sex_per_cell))
+ggs_sex <- lapply(names(sex_subsets), function(n) {
+  t.g <- con$plotGraph(groups=sex_subsets[[n]], size=0.05, alpha=0.05, plot.na=F, 
+                          mark.groups=F, show.legend=T, legend.pos=c(1,1), 
+                          raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+    gg_annot$layers[[2]] +
+    scale_size_continuous(range=c(2, 3), trans='identity', guide='none') +
+    scale_color_manual(values=c("#7b3294", "#008837")) +
+    guides(color=guide_legend(override.aes=list(size=2, alpha=1), title="Sex")) +
+    theme(panel.grid=element_blank())
+  ggsave(outPath(paste0("sex_", n, ".pdf")), t.g)
+  t.g
+})
+
+
+ggs_sex
+```
+
+## Cell type presence
+
+```{r}
+con$getDatasetPerCell() %>% table(annotation[names(.)]) %>% as.matrix() %>% 
+  `/`(rowSums(.)) %>% `*`(100) %>% round(2) %>% as.data.frame.matrix() %>% 
+  as_tibble(rownames="Sample") %>% mutate(Sample=factor(Sample, levels=sample_info$Alias)) %>% 
+  arrange(Sample) %>% write_csv(outPath("cell_type_presence_by_sample.csv"))
+```
+
+```{r, fig.width=8, fig.height=8, message=FALSE, warning=FALSE}
+sample_per_cell <- con$getDatasetPerCell() %>% factor(levels=unlist(samp_per_cond))
+sf_per_cond <- unique(condition_per_sample) %>% setNames(., .) %>% lapply(function(n)
+  sample_per_cell[condition_per_sample[as.character(sample_per_cell)] == n])
+
+gg_type_persence <- lapply(sf_per_cond, function(sf)
+  plotClusterBarplots(groups=annotation, sample.factor=sf, show.entropy=F, show.size=F) +
+    labs(x="", y="Fraction of cells") + scale_y_continuous(expand=c(0, 0)) +
+    theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.key.height=unit(12, "pt")) +
+    scale_fill_manual(values=sample(RColorBrewer::brewer.pal(length(levels(sf)), "Paired")))
+)
+
+cowplot::plot_grid(plotlist=gg_type_persence, ncol=1, labels=c("Control", "Epilepsy"), label_x=0.04, label_y=0.98)
+ggsave(outPath("cell_type_presence_by_sample.pdf"))
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE, warning=FALSE}
+p_df <- table(Sample=sample_per_cell) %>% as.data.frame() %>% 
+  mutate(Condition=condition_per_sample[as.character(Sample)])
+
+ggplot(p_df) +
+  geom_bar(aes(x=Sample, y=Freq, fill=Condition), stat="identity") +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  scale_y_continuous(expand=expand_scale(c(0, 0.05))) +
+  labs(x="", y="Number of cells") +
+  theme(legend.position="none", panel.grid.major.x=element_blank()) +
+  theme_borders
+
+ggsave(outPath("n_cells_per_sample.pdf"))
+```
+
+```{r}
+expected_frac_per_type <- table(annotation[names(sample_per_cell[grep("C", sample_per_cell)])]) %>% `/`(sum(.)) %>% 
+  as.matrix() %>% .[,1]
+
+has_low_frac <- table(sample_per_cell, annotation[names(sample_per_cell)]) %>% as.matrix() %>% 
+  `/`(rowSums(.)) %>% t() %>% `<`(expected_frac_per_type * 0.1)
+
+colSums(has_low_frac)
+rowMeans(has_low_frac)
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE, warning=FALSE}
+has_few_cells <- table(sample_per_cell, annotation[names(sample_per_cell)]) %>% `<`(5)
+p_df <- rowSums(has_few_cells) %>% as_tibble(rownames="Sample") %>%
+  mutate(Condition=condition_per_sample[as.character(Sample)], 
+         Sample=factor(Sample, levels=levels(sample_per_cell)))
+
+ggplot(p_df) +
+  geom_bar(aes(x=Sample, y=value, fill=Condition), stat="identity") +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  scale_y_continuous(expand=expansion(c(0, 0.05))) +
+  labs(x="", y="Number of subtypes with <5 nuclei") +
+  theme(legend.position="none", panel.grid.major.x=element_blank()) +
+  theme_borders
+
+ggsave(outPath("n_missed_types_per_sample.pdf"))
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE}
+p_df <- (1 - colMeans(has_few_cells)) %>% as_tibble(rownames="Type") %>%
+  mutate(NeuronType=neuron_type_per_type[as.character(Type)], Type=factor(Type, levels=type_order))
+ggplot(p_df) +
+  geom_bar(aes(x=Type, y=value, fill=NeuronType), stat="identity") +
+  geom_hline(aes(yintercept=0.9)) +
+  scale_fill_brewer(palette="Set2") +
+  scale_y_continuous(expand=expansion(c(0, 0))) +
+  labs(x="", y="Fraction of samples\n with >= 5 nuclei") +
+  theme(legend.position="none", panel.grid.major.x=element_blank(), 
+        axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))
+
+ggsave(outPath("presence_frac_per_type_before_filt.pdf"))
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE}
+p_df <- (1 - colMeans(has_few_cells[!(rownames(has_few_cells) %in% c("C3", "C5", "E5")),])) %>% 
+  as_tibble(rownames="Type") %>%
+  mutate(NeuronType=neuron_type_per_type[as.character(Type)], Type=factor(Type, levels=type_order))
+ggplot(p_df) +
+  geom_bar(aes(x=Type, y=value, fill=NeuronType), stat="identity") +
+  geom_hline(aes(yintercept=0.9)) +
+  scale_fill_brewer(palette="Set2") +
+  scale_y_continuous(expand=expansion(c(0, 0))) +
+  labs(x="", y="Fraction of samples\n with >= 5 nuclei") +
+  theme(legend.position="none", panel.grid.major.x=element_blank(), 
+        axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))
+
+ggsave(outPath("presence_frac_per_type_after_filt.pdf"))
+```
+
+```{r}
+n_genes_per_sample <- names(con$samples) %>% setNames(., .) %>% 
+  pblapply(function(n) tibble(Sample=n, NGenes=getNGenes(con$samples[[n]]$misc$rawCounts))) %>% 
+  Reduce(rbind, .) %>% mutate(Condition=condition_per_sample[Sample]) %>% 
+  mutate(Sample=factor(Sample, levels=levels(sample_per_cell)))
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE, warning=FALSE}
+ggplot(n_genes_per_sample) +
+  geom_boxplot(aes(x=Sample, y=NGenes, fill=Condition)) +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  labs(x="", y="Number of genes/nucleus") +
+  theme(legend.position="none", panel.grid.major.x=element_blank()) +
+  theme_borders
+
+ggsave(outPath("n_genes_per_sample.pdf"))
+```
+
+```{r, fig.width=8, fig.height=4, message=FALSE, warning=FALSE}
+n_cells_per_type <- annotation %>% split(condition_per_cell[names(.)]) %>% lapply(table)
+n_cells_per_type <- names(n_cells_per_type) %>% setNames(., .) %>% lapply(function(n) 
+  n_cells_per_type[[n]] %>% tibble(N=., Type=names(.), Condition=n)) %>% 
+  Reduce(rbind, .) %>% mutate(N=as.integer(N), NeuronType=neuron_type_per_type[Type]) %>% 
+  split(.$NeuronType)
+
+ggs <- lapply(n_cells_per_type, function(df)
+  ggplot(df) +
+    geom_bar(aes(x=Type, y=N, fill=Condition, group=Condition), stat="identity", position="dodge") +
+    scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+    scale_y_continuous(expand=expand_scale(c(0, 0.05))) +
+    labs(x="", y="") +
+    theme(legend.position=c(1, 1.05), legend.justification=c(1, 1), panel.grid.major.x=element_blank(), 
+          axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.title=element_blank(),
+          legend.background=element_blank(), plot.margin=margin()) +
+    theme_borders
+)
+
+ggs[[1]] %<>% `+`(scale_y_continuous(expand=expansion(c(0, 0.05)), name="Number of nuclei", breaks=c(4000, 8000, 12000)))
+cowplot::plot_grid(plotlist=ggs, nrow=1, rel_widths=c(1, 1.5), align="h")
+
+ggsave(outPath("n_cells_per_type.pdf"))
+```
+
+## Markers
+
+### Heatmaps
+
+```{r, fig.width=6, fig.height=11}
+ex_markers <- c(
+  # "Slc17a7", 
+  "Cux2", "Rorb", "Themis", "Fezf2", "Pdgfd", "Lamp5", "March1", "Frem3", "Unc5d", 
+  "Lama2", "Prss12", "Col5a2", "Dcc", "Schlap1", "Tox", "Cobll1", "Inpp4b", "Mme", "Plch1", 
+  "Met", "Gabrg1", "Arhgap15", "Grik3", "Ntng2", "Nr4a2", "Dcstamp", "Sema3a", "Lrrk1", 
+  "Tle4", "Arsj", "Pcp4", "Tll1", "Sema3e", "Slit3", "Abo", "Sema5a", "Grin3a", "Htr2c", "Il26", "Card11", 
+  "Kcnip1", "Scube1", "Slc15a5"
+) %>% toupper()
+
+c_types <- c(
+  "L2_Cux2_Lamp5", "L2_3_Cux2_Frem3", "L3_Cux2_Prss12", 
+  "L4_Rorb_Mme", "L4_Rorb_Met", "L4_Rorb_Arhgap15",
+  "L5_6_Themis_Ntng2", "L5_6_Themis_Sema3a", 
+  "L5_6_Fezf2_Lrrk1_Pcp4", "L5_6_Fezf2_Lrrk1_Sema3e",
+  "L5_6_Fezf2_Tle4_Abo", "L5_6_Fezf2_Tle4_Htr2c", "L5_6_Fezf2_Tle4_Scube1"
+)
+ex_annotation <- annotation %>% .[. %in% c_types] %>% factor(levels=c_types)
+
+gg_ex_heatmap_all <- estimateFoldChanges(cm_merged, ex_markers, ex_annotation) %>% pmax(0) %>% 
+  plotGGHeatmap(legend.title="log2 fold-change") + scale_fill_distiller(palette="RdYlBu")
+
+c_types <- c("L2_3_Cux2", "L4_Rorb", "L5_6_Themis", "L5_6_Fezf2")
+ex_annotation <- annotation_by_level$l2 %>% .[. %in% c_types] %>% factor(levels=c_types)
+
+gg_ex_heatmap <- estimateFoldChanges(cm_merged, ex_markers, ex_annotation) %>% pmax(0) %>% 
+  plotGGHeatmap(legend.title="log2 fold-change") + scale_fill_distiller(palette="RdYlBu")
+
+ggsave(outPath("ex_markers_heatmap.pdf"), gg_ex_heatmap_all, width=4.5, height=8)
+ggsave(outPath("ex_markers_heatmap_sum.pdf"), gg_ex_heatmap, width=2.5, height=8)
+
+gg_ex_heatmap_all
+gg_ex_heatmap
+```
+
+```{r, fig.width=7, fig.height=8}
+inh_markers <- c(
+  # "Gad1", "Gad2", 
+  "Lhx6", "Sox6", "Adarb2", "Nr2f2", "Pvalb", "Sst", "Vip", "Id2", "Crh", 
+  "Nog", "Lgr5", "Mepe", "Sulf1", "Nos1", "Isoc1", "Calb1", "Hpgd", "Gxylt2", "Stk32a", "Reln", 
+  "Tac1", "Tac3", "Th", "Trhde", "Calb2", "Cck", "Abi3bp", "Hs3st3a1", "Cbln1", "Htr2c", "Oprm1", 
+  "Nrg1", "Sema3c", "Dach2", "Sstr1", "Tyr", "Lamp5", "Lcp2", "Nmbr", "Lhx6", "Nckap5", "Pax6"
+) %>% toupper() %>% unique()
+
+c_types <- c("Pvalb", "Sst", "Vip", "Id2")
+t_ann <- annotation_by_level$l2 %>% .[. %in% c_types] %>% factor(levels=c_types)
+
+gg_inh_heatmap <- estimateFoldChanges(cm_merged, inh_markers, t_ann) %>% pmax(0) %>% 
+  plotGGHeatmap(legend.title="log2 fold-change") + scale_fill_distiller(palette="RdYlBu")
+
+c_types <- c('Pvalb_Crh', 'Pvalb_Lgr5', 'Pvalb_Nos1', 'Pvalb_Sulf1',
+             'Sst_Calb1', 'Sst_Isoc1', 'Sst_Nos1', 'Sst_Stk32a', 'Sst_Tac1', 'Sst_Tac3', 'Sst_Th',
+             'Vip_Abi3bp', 'Vip_Cbln1', 'Vip_Crh', 'Vip_Nrg1', 'Vip_Sema3c', 'Vip_Sstr1', 'Vip_Tyr',
+             'Id2_Lamp5_Crh', 'Id2_Lamp5_Nmbr', 'Id2_Lamp5_Nos1', 'Id2_Nckap5', 'Id2_Pax6')
+t_ann <- annotation %>% .[. %in% c_types] %>% factor(levels=c_types)
+
+gg_inh_heatmap_all <- estimateFoldChanges(cm_merged, inh_markers, t_ann) %>% pmax(0) %>% 
+  plotGGHeatmap(legend.title="log2 fold-change") + scale_fill_distiller(palette="RdYlBu")
+
+ggsave(outPath("inh_markers_heatmap.pdf"), gg_inh_heatmap_all, width=5, height=8)
+ggsave(outPath("inh_markers_heatmap_sum.pdf"), gg_inh_heatmap, width=2.5, height=8)
+
+gg_inh_heatmap
+gg_inh_heatmap_all
+```
+
+### Embeddings
+
+```{r, fig.width=11, fig.height=8}
+p_genes <- c("Slc17a7", "Gad1", "Gad2", "Cux2", "Rorb", "Themis", "Fezf2", "Pvalb", "Sst", "Vip", "Id2")
+
+gg_ann <- plotAnnotationByLevels(con$embedding, annotation_by_level, size=0.1, font.size=c(4, 4), shuffle.colors=T,
+                       raster=T, raster.dpi=120, raster.width=4, raster.height=4, build.panel=F)[[2]]
+
+gg_genes <- toupper(p_genes) %>% plotGeneExpression(con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2, 
+                                   raster=T, raster.width=11/4, raster.height=8/3, raster.dpi=100)
+
+c(list(gg_ann), gg_genes) %>% 
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %>% 
+  cowplot::plot_grid(plotlist=., ncol=4, labels=c("", p_genes), label_fontface="italic", label_x=0.3)
+
+ggsave(outPath("main_markers_emb.pdf"), width=11, height=8)
+```
+
+```{r, fig.height=2.66, fig.width=8, message=FALSE, warning=FALSE}
+p_genes <- c("Fezf2", "Lrrk1", "Tle4")
+p_emb <- annotation_by_level %$% names(l1)[l1 == "Excitatory"] %>% con$embedding[.,]
+p_xlims <- quantile(p_emb[,1], c(0.01, 0.99)) %>% `+`(diff(.) * c(-0.05, 0.05))
+p_ylims <- quantile(p_emb[,2], c(0.01, 0.99)) %>% `+`(diff(.) * c(-0.05, 0.05))
+
+plotGeneExpression(toupper(p_genes), con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2,
+                   groups=annotation_by_level$l1, subgroups="Excitatory",
+                   raster=T, raster.width=8/3, raster.height=8/3, raster.dpi=100) %>% 
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %>% 
+  lapply(`+`, lims(x=p_xlims, y=p_ylims)) %>%
+  cowplot::plot_grid(plotlist=., nrow=1, labels=p_genes, label_fontface="italic")
+
+ggsave(outPath("ex_markers_emb.pdf"), width=8, height=8/3)
+```
+
+```{r, fig.height=2.66, fig.width=5.33, message=FALSE, warning=FALSE}
+p_genes <- c("Id2", "Lamp5")
+p_emb <- annotation_by_level %$% names(l1)[l1 == "Inhibitory"] %>% con$embedding[.,]
+p_xlims <- quantile(p_emb[,1], c(0.01, 0.99)) %>% `+`(diff(.) * c(-0.05, 0.05))
+p_ylims <- quantile(p_emb[,2], c(0.01, 0.99)) %>% `+`(diff(.) * c(-0.05, 0.05))
+
+plotGeneExpression(toupper(p_genes), con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2,
+                   groups=annotation_by_level$l1, subgroups="Inhibitory",
+                   raster=T, raster.width=8/3, raster.height=8/3, raster.dpi=100) %>%
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %>% 
+  lapply(`+`, lims(x=p_xlims, y=p_ylims)) %>%
+  cowplot::plot_grid(plotlist=., nrow=1, labels=p_genes, label_fontface="italic")
+
+ggsave(outPath("inh_markers_emb.pdf"), width=2*8/3, height=8/3)
+```
+
+### Key marker levels
+
+```{r}
+con_filt <- read_rds(CachePath("con_filt_samples.rds"))
+```
+
+```{r, fig.width=6, fig.height=4, message=FALSE, warning=FALSE}
+p_dfs <- c("CNR1", "GAD1", "GAD2") %>% 
+  prepareExpressionDfs(con_filt$samples, annotation, neuron.types=neuron_type_per_type, 
+                       condition.per.sample=condition_per_sample)
+
+ggs <- lapply(p_dfs, averageGeneDfBySamples) %>% lapply(plotExpressionAveraged, text.size=10) %>% 
+  lapply(`[[`, 1) %>% 
+  lapply(`+`, theme(legend.title=element_blank(), legend.position=c(1, 1.03), 
+                    legend.justification=c(1, 1), legend.box.background=element_blank())) %>% 
+  lapply(`+`, scale_color_manual(values=c("#0571b0", "#ca0020")))
+
+ggs <- names(ggs) %>% setNames(., .) %>% lapply(function(n) 
+  ggs[[n]] + ggplot2::annotate("Text", x=1, y=0.9, label=n, vjust=1, hjust=0))
+
+for (n in names(ggs)) {
+  ggsave(outPath(paste0("gene_", n, ".pdf")), ggs[[n]], width=6, height=4)
+}
+
+ggs
+```
