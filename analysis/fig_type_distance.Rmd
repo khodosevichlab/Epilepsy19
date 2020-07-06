@@ -1,0 +1,214 @@
+---
+title: "Cell Type Distance Plots"
+output: html_notebook
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(pagoda2)
+library(conos)
+library(parallel)
+library(ggplot2)
+library(pbapply)
+library(tibble)
+library(dplyr)
+library(ggrastr)
+library(cowplot)
+library(readr)
+
+devtools::load_all()
+theme_set(theme_bw())
+
+outPath <- function(...) OutputPath("fig_type_diff", ...)
+```
+
+```{r, message=FALSE, warning=FALSE}
+con <- CachePath("con_filt_samples.rds") %>% read_rds()
+
+sample_per_cell <- con$getDatasetPerCell()
+
+annotation_by_level <- read_csv(MetadataPath("annotation.csv"))
+annotation <- annotation_by_level %$% setNames(l4, cell) %>% .[names(sample_per_cell)]
+
+all_types <- annotation_by_level %>% .[,2:ncol(.)] %>% unlist() %>% unique()
+neuron_type_per_type <- ifelse(grepl("(L[2-6].+)|(Excitatory)", all_types), "Excitatory", "Inhibitory") %>% 
+  setNames(all_types)
+
+condition_per_sample <- ifelse(grepl("E", levels(sample_per_cell)), "epilepsy", "control") %>% 
+  setNames(levels(sample_per_cell))
+condition_per_cell <- condition_per_sample[sample_per_cell] %>% setNames(names(sample_per_cell))
+```
+
+## Embeddings. Figure 1a-b
+
+```{r}
+plot_theme <- theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+                    panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+div_fill_scale <- scale_fill_brewer(palette="Set2")
+div_color_scale <- scale_color_brewer(palette="Set2")
+```
+
+Fig. 3a:
+
+```{r, fig.width=7, fig.height=7}
+p_emb <- con$plotGraph(alpha=0.2, size=0.05, mark.groups=T, show.legend=F, groups=annotation, 
+                       raster=T, raster.dpi=150, font.size=4, shuffle.colors=F, show.labels=T) + 
+  plot_theme + labs(x="UMAP 1", y="UMAP 2") #+ scale_color_manual(values=type_colors)
+
+p_emb
+```
+
+## Cell type fraction
+
+```{r}
+cell_num_df <- table(Type=annotation, Sample=con$getDatasetPerCell()[names(annotation)]) %>%
+  as_tibble() %>% 
+  mutate(NeuronType=neuron_type_per_type[Type],
+         Condition=condition_per_sample[Sample],
+         Frac=as.vector(n / table(sample_per_cell)[Sample]))
+cell_num_dfs <- split(cell_num_df, cell_num_df$NeuronType)
+```
+
+```{r, fig.width=8, fig.height=4}
+p_cell_num_joint <- cowplot::plot_grid(
+  plotCellFracPerType(cell_num_dfs$Excitatory, y.max=30), 
+  plotCellFracPerType(cell_num_dfs$Inhibitory, y.max=10) + theme(axis.title.y=element_blank()), 
+  align="h", rel_widths=c(3, 4)
+)
+
+ggsave(outPath("cell_fraction.pdf"), p_cell_num_joint, width=8, height=4)
+
+p_cell_num_joint
+```
+
+## Correlations. Figure 1c-d
+
+```{r}
+cm_merged <- con$getJointCountMatrix(raw=T) %>% Matrix::t()
+
+od_genes <- conos:::getOdGenesUniformly(con$samples, 1000)
+
+p2_merged <- Pagoda2$new(cm_merged)
+p2_merged$reductions$cm <- p2_merged$counts[, od_genes] # Avoid scaling variance
+p2_merged$calculatePcaReduction(nPcs=100, maxit=1000, verbose=T, type="cm", use.odgenes=F)
+```
+
+Average number of genes:
+
+```{r}
+cm_bool <- drop0(cm_merged)
+cm_bool@x[] <- 1
+
+n_genes_per_cell <- colSums(cm_bool)
+n_umis_per_cell <- colSums(cm_merged)
+
+mean(n_genes_per_cell)
+```
+
+```{r}
+cell_sim_df <- p2_merged$reductions$PCA %>% 
+  prepareDiffStatDf(sample_per_cell, annotation, neuron.type.per.type=neuron_type_per_type, 
+                    condition.per.sample=condition_per_sample)
+
+t_df <- tibble(Id=names(n_genes_per_cell), NGenes=n_genes_per_cell, NUMIs=n_umis_per_cell) %>% 
+  mutate(S=as.character(sample_per_cell[Id]), Type=annotation[Id]) %>% select(-Id) %>% 
+  group_by(S, Type) %>% summarise(NGenes=median(NGenes), NUMIs=median(NUMIs))
+
+cell_sim_df %<>% left_join(t_df, by=c(S1="S", "Type"="Type")) %>% 
+  rename(NGenes1=NGenes, NUMIs1=NUMIs) %>% 
+  left_join(t_df, by=c(S2="S", Type="Type")) %>%
+  rename(NGenes2=NGenes, NUMIs2=NUMIs)
+
+cell_sim_dfs <- cell_sim_df %>% filter(MinSize > 2) %>% split(.$NeuronType)
+```
+
+Coorelations to covariates:
+
+```{r, fig.width=6, fig.height=3, message=FALSE}
+plot_guide <- guide_legend(title="Neuron type", override.aes=list(size=2, alpha=1))
+ggplot(cell_sim_df) + 
+  geom_point(aes(x=MinSize, y=DiffStat, color=NeuronType, shape=NeuronType), size=1, alpha=0.75) +
+  ggrastr::theme_pdf(legend.pos=c(0, 0)) + div_color_scale +
+  guides(color=plot_guide, shape=plot_guide) +
+  labs(x="Cluster size", y="Similarity stat") +
+  scale_x_log10()
+
+ggsave(outPath("similarity_vs_cluster_size.pdf"), width=6, height=3)
+```
+
+```{r, fig.width=6, fig.height=3, message=FALSE}
+ggplot(cell_sim_df) + 
+  geom_point(aes(x=pmin(NGenes1, NGenes2), y=DiffStat, color=NeuronType, shape=NeuronType), size=1, alpha=0.75) +
+  ggrastr::theme_pdf(legend.pos=c(0, 0)) + div_color_scale +
+  guides(color=plot_guide, shape=plot_guide) +
+  labs(x="Number of genes", y="Similarity stat")
+
+ggsave(outPath("similarity_vs_n_genes.pdf"), width=6, height=3)
+```
+
+```{r, fig.width=6, fig.height=3, message=FALSE}
+ggplot(cell_sim_df) + 
+  geom_point(aes(x=pmin(NUMIs1, NUMIs2), y=DiffStat, color=NeuronType, shape=NeuronType), size=1, alpha=0.75) +
+  ggrastr::theme_pdf(legend.pos=c(0, 0)) + div_color_scale +
+  guides(color=plot_guide, shape=plot_guide) +
+  labs(x="Number of UMIs", y="Similarity stat") +
+  scale_x_log10()
+
+ggsave(outPath("similarity_vs_n_umis.pdf"), width=6, height=3)
+```
+
+```{r, fig.width=10, fig.height=5}
+gg_sims <- mapply(function(df, col) plotSimilarityStat(df, y.lims=c(-12, 2.5), fill.color=col, text.angle=90, size=0.2),
+                  cell_sim_dfs, c("#66c2a5", "#fc8d62"), SIMPLIFY=F)
+
+p_sims_joint <- cowplot::plot_grid(plotlist=gg_sims, align="h", rel_widths=c(4, 5))
+
+ggsave(outPath("similarities.pdf"), p_sims_joint, width=8, height=4)
+
+p_sims_joint
+```
+
+## Ranking statistics
+
+### Cell number
+
+```{r}
+perm_p_vals <- cell_num_df %>% mutate(Condition=as.factor(Condition)) %>% 
+  split(.$Type) %>% pbsapply(function(df) {
+    perm.diffs <- sapply(1:50000, function(i) 
+      split(df$Frac, sample(df$Condition)) %>% sapply(mean, trim=0.4) %>% diff() %>% abs())
+    
+    obs.diff <- df %$% split(Frac, Condition) %>% sapply(mean, trim=0.4) %>% diff() %>% abs()
+    return(mean(obs.diff < perm.diffs))
+  }, cl=40)
+
+cell_num_rank_df <- tibble(Type=names(perm_p_vals), Stat=perm_p_vals, Affected=(perm_p_vals < 0.2), 
+                           HighlyAffected=(perm_p_vals < 0.05)) %>% 
+  mutate(Rank=setNames(Stat, Type) %>% split(neuron_type_per_type[Type]) %>% lapply(rank) %>% Reduce(c, .) %>% .[Type],
+         StatType="CellNumber")
+```
+
+### Expression similarity
+
+```{r}
+stat_per_type <- cell_sim_df %>% filter(!SameCondition) %$% split(DiffStat, Type)
+med_stat_per_type <- stat_per_type %>% sapply(median)
+
+is_affected <- sapply(stat_per_type, quantile, 0.75) %>% setNames(names(stat_per_type)) < 0
+is_highly_affected <- med_stat_per_type %>% split(neuron_type_per_type[names(.)]) %>% 
+  sapply(function(x) x < median(x)) %>% Reduce(c, .)
+
+stat_rank <- med_stat_per_type %>% split(neuron_type_per_type[names(.)]) %>% 
+  sapply(rank) %>% Reduce(c, .)
+
+sim_stat_rank_df <- tibble(Type=names(med_stat_per_type), Stat=med_stat_per_type, Affected=is_affected, 
+                           HighlyAffected=is_highly_affected[names(med_stat_per_type)], 
+                           Rank=stat_rank[names(med_stat_per_type)], StatType="Similarity")
+```
+
+### Save all
+
+```{r}
+cell_num_rank_df %>% rbind(sim_stat_rank_df) %>% 
+  write_csv(OutputPath("total_ranking", "type_distance.csv"))
+```
