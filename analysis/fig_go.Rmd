@@ -1,0 +1,581 @@
+---
+title: "Figures with gene pathways"
+output: html_notebook
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(pagoda2)
+library(conos)
+library(parallel)
+library(magrittr)
+library(ggplot2)
+library(pbapply)
+library(tibble)
+library(dplyr)
+library(ggrastr)
+library(cowplot)
+library(ggbeeswarm)
+library(readr)
+library(pheatmap)
+library(reshape2)
+
+library(clusterProfiler)
+library(DOSE)
+library(org.Hs.eg.db)
+library(enrichplot)
+
+devtools::load_all()
+theme_set(theme_bw())
+
+outPath <- function(...) OutputPath("fig_go", ...)
+div_fill_scale <- scale_fill_brewer(palette="Set2")
+div_color_scale <- scale_color_brewer(palette="Set2")
+
+kNtColors <- c(Inhibitory="#1b9e77", Excitatory="#d95f02")
+```
+
+## Prepare data
+
+```{r, message=FALSE, warning=FALSE}
+con <- read_rds(CachePath("con_filt_samples.rds"))
+
+cm_merged <- con$getJointCountMatrix() %>% Matrix::t()
+cm_merged_raw <- con$getJointCountMatrix(raw=T) %>% Matrix::t()
+
+annotation_by_level <- MetadataPath("annotation.csv") %>% read_csv() %>%
+  filter(cell %in% colnames(cm_merged))
+annotation <- annotation_by_level %$% setNames(l4, cell) %>% as.factor()
+sample_per_cell <- con$getDatasetPerCell()
+
+neuron_type_per_type <- ifelse(grepl("L[2-6].+", unique(annotation)), "Excitatory", "Inhibitory") %>% 
+  setNames(unique(annotation))
+
+condition_per_sample <- ifelse(grepl("E", levels(sample_per_cell)), "epilepsy", "control") %>% 
+  setNames(levels(sample_per_cell))
+
+type_order <- names(neuron_type_per_type)[order(neuron_type_per_type, names(neuron_type_per_type))]
+```
+
+```{r, fig.width=8, fig.height=8}
+con$plotGraph(groups=annotation, size=0.1, shuffle.colors=T, font.size=c(2,4))
+```
+
+```{r}
+annot_filt <- as.factor(annotation[names(con$getDatasetPerCell())])
+cm_bool <- cm_merged_raw
+cm_bool@x <- (cm_merged_raw@x > 1) * 1
+cm_collapsed_bool <- conos:::collapseCellsByType(Matrix::t(cm_bool), annot_filt, min.cell.count=0)
+
+expressed_genes_per_type <- (cm_collapsed_bool > as.vector(table(annot_filt)[rownames(cm_collapsed_bool)] * 0.05)) %>% 
+  apply(1, function(row) names(which(row)))
+
+gene_id_per_name <- bitr(rownames(cm_merged_raw), 'SYMBOL', 'ENTREZID', org.Hs.eg.db) %$%
+  setNames(ENTREZID, SYMBOL)
+
+measured_universe <- gene_id_per_name[rownames(cm_bool)] %>% .[!is.na(.)]
+```
+
+```{r, message=FALSE, warning=FALSE}
+sample_groups <- split(names(condition_per_sample), condition_per_sample)
+de <- getPerCellTypeDE(con, groups=annotation, sample.groups=sample_groups,
+                       ref.level="control", n.cores=40, min.cell.count=3) %>% lapply(`[[`, "res")
+
+de_filtered <- lapply(de, function(df) df[!is.na(df$stat) & (abs(df$stat) > 3),])
+de_genes_filt <- mapply(intersect, lapply(de_filtered, rownames), expressed_genes_per_type[names(de_filtered)])
+
+de_gene_ids <- lapply(de_genes_filt, function(gs) gene_id_per_name[gs] %>% .[!is.na(.)])
+```
+
+```{r, message=FALSE, warning=FALSE}
+de_all <- names(de_filtered) %>% lapply(function(n) 
+  cbind(Type=n, de_filtered[[n]], lowExpession=!(rownames(de_filtered[[n]]) %in% expressed_genes_per_type[[n]]))) %>% 
+  lapply(as_tibble, rownames="Gene") %>% bind_rows()
+
+write_csv(de_all, outPath("de_all.csv"))
+```
+
+## Volcano plots
+
+```{r, fig.width=8, fig.height=10, warning=FALSE, message=FALSE}
+gg_volcanos <- de %>% split(neuron_type_per_type[names(.)]) %>% lapply(function(des) {
+  lapply(des, function(de) de %>% EnhancedVolcano::EnhancedVolcano(
+    lab=rownames(.), x = 'log2FoldChange', y = 'padj', legendPosition="none",
+    pCutoff=5e-2, FCcutoff=1.5, labSize=2, title=NULL, subtitle=NULL, caption=NULL, 
+    axisLabSize=10, pointSize=0.5, xlab=NULL, ylab=NULL, xlim=c(-5, 6.5),
+    raster=T, raster.width=8/3, raster.height=ifelse(length(des) > 15, 10/8, 10/5), raster.dpi=150
+    ) +
+           scale_y_continuous(limits=c(0, -log10(max(de$padj))), expand=c(0, 0.1)) +
+           theme(plot.margin=margin(), axis.ticks.length=unit(0.1, "pt"))
+  ) %>% cowplot::plot_grid(plotlist=., ncol=3, labels=paste0(names(des), "\n", sapply(des, nrow), " genes"), 
+                           label_x=0.14, label_y=0.99, label_size=6, align="hv", axis="lrtb", hjust=0) %>% 
+    `+`(theme(plot.margin=margin(b=12, l=12))) %>% 
+    `+`(draw_label("Log2(Fold Change)", size=12, y=-0.01, angle = 0)) %>% 
+    `+`(draw_label("-Log10(P-adjusted)", size=12, x=-0.01, angle = 90))
+})
+
+gg_volcanos
+
+ggsave(outPath("volcanos_ex.pdf"), gg_volcanos$Excitatory, width=8, height=10)
+ggsave(outPath("volcanos_inh.pdf"), gg_volcanos$Inhibitory, width=8, height=10)
+```
+
+## GWAS and EP genes
+
+```{r, message=FALSE}
+expressed_genes <- unlist(expressed_genes_per_type) %>% unique()
+gwas_genes <- read_csv(MetadataPath("gwas_genes.csv"))$x %>% 
+  intersect(expressed_genes)
+
+ep_genes <- read_csv(MetadataPath("ep_genes.csv"))$x %>% 
+  intersect(rownames(cm_merged))
+```
+
+### GWAS genes
+
+```{r, fig.width=7, fig.height=4}
+gwas_test_res <- fTestPerDe(de_genes_filt, gwas_genes, expressed_genes) %>% 
+  mutate(Type=factor(Type, levels=type_order))
+
+p_gwas <- plotFTestResults(gwas_test_res, neuron_type_per_type, y.max=40, y.lab="Enrichment statistic\nfor GWAS genes") +
+  div_fill_scale
+
+ggsave(outPath("gwas_enrichment.pdf"), p_gwas, width=7, height=4)
+
+p_gwas
+```
+
+```{r}
+gwas_rank_df <- gwas_test_res %$% 
+  tibble(Type=as.character(Type), Stat=stat, Affected=(stat > 1), HighlyAffected=(stat_min > 0.75)) %>% 
+  mutate(Rank=setNames(-Stat, Type) %>% split(neuron_type_per_type[Type]) %>% lapply(rank) %>% Reduce(c, .) %>% .[Type], 
+         StatType="GWAS")
+```
+
+```{r}
+gwas_hits_lst <- lapply(de_filtered, function(x) sort(intersect(rownames(x), gwas_genes)))
+gwas_hits <- tibble(Type=factor(names(gwas_hits_lst), levels=type_order),
+                    NHits=sapply(gwas_hits_lst, length),
+                    Hits=sapply(gwas_hits_lst, paste, collapse=",")) %>% 
+  arrange(Type)
+write_csv(gwas_hits, outPath("gwas_hits.csv"))
+
+gwas_hits
+```
+
+### EP genes
+
+```{r, fig.width=7, fig.height=4}
+ep_test_res <- fTestPerDe(de_genes_filt, ep_genes, expressed_genes) %>% 
+  mutate(Type=factor(Type, levels=type_order))
+
+p_ep_genes <- plotFTestResults(ep_test_res, neuron_type_per_type, y.max=15, y.lab="Enrichment statistic\nfor epilepsy-related genes") +
+  div_fill_scale
+
+ggsave(outPath("epilepsy_enrichment.pdf"), p_ep_genes, width=7, height=4)
+
+p_ep_genes
+```
+
+```{r}
+ep_enrich_rank_df <- ep_test_res %$% 
+  tibble(Type=as.character(Type), Stat=stat, Affected=(stat > 1), HighlyAffected=(stat_min > 0.75)) %>% 
+  mutate(Rank=setNames(-Stat, Type) %>% split(neuron_type_per_type[Type]) %>% lapply(rank) %>% Reduce(c, .) %>% .[Type], 
+         StatType="EPEnrichment")
+```
+
+```{r}
+ep_hits_lst <- lapply(de_filtered, function(x) sort(intersect(rownames(x), ep_genes)))
+ep_hits <- tibble(Type=factor(names(ep_hits_lst), levels=type_order),
+                  NHits=sapply(ep_hits_lst, length),
+                  Hits=sapply(ep_hits_lst, paste,collapse=",")) %>% 
+  arrange(Type)
+write_csv(ep_hits, outPath("ep_hits.csv"))
+ep_hits
+```
+
+```{r}
+unlist(ep_hits_lst) %>% table()
+```
+
+## Disorder Genes
+
+```{r}
+dos <- pblapply(de_gene_ids, enrichDO, ont="DO", readable=T, pAdjustMethod='BH', minGSSize=5, pvalueCutoff=0.99) %>% 
+  lapply(function(x) x@result)
+dos %<>% names() %>% setNames(., .) %>% lapply(function(n) mutate(dos[[n]], Type=n))
+do_df <- lapply(dos, function(x) filter(x, p.adjust < 0.05)) %>% .[sapply(., nrow) > 0] %>% 
+  bind_rows() %>% dplyr::select(Type, ID, Description, GeneRatio, geneID, pvalue, p.adjust, qvalue)
+
+write_csv(do_df, outPath("disease_ontology_hits.csv"))
+head(do_df)
+```
+
+## GO
+
+Autopsy genes:
+
+```{r}
+table_path <- MetadataPath("tissue_signatures_allen.xlsx")
+neurosurgery_genes <- openxlsx::read.xlsx(table_path)$gene %>% intersect(rownames(cm_merged))
+autopsy_genes <- openxlsx::read.xlsx(table_path, sheet=2)$gene %>% intersect(rownames(cm_merged))
+
+auto_surg_genes <- union(autopsy_genes, neurosurgery_genes)
+```
+
+### Estimate GO
+
+```{r}
+go_datas <- c("BP", "CC", "MF") %>% setNames(., .) %>%
+  pblapply(function(n) clusterProfiler:::get_GO_data(org.Hs.eg.db, n, "ENTREZID") %>%
+             as.list() %>% as.environment()) # otherwise it pass reference to the environment content
+
+# gos <- c("BP", "CC", "MF") %>% setNames(., .) %>% lapply(function(ont)
+#   pblapply(de_gene_ids, enrichGO, ont=ont, readable=T,  pAdjustMethod='BH', OrgDb=org.Hs.eg.db)) %>%
+#   lapply(lapply, function(x) x@result)
+
+gos <- names(go_datas) %>% setNames(., .) %>% lapply(function(ont)
+  pblapply(de_gene_ids, enrichGOOpt, ont=ont, goData=go_datas[[ont]], universe=measured_universe,
+           readable=T, pAdjustMethod='BH', OrgDb=org.Hs.eg.db, cl=45)) %>%
+  lapply(lapply, function(x) x@result)
+
+gos %<>% lapply(lapply, function(x)
+  mutate(x, AutopsyFraction=strsplit(geneID, "/") %>%
+           sapply(function(x) mean(x %in% auto_surg_genes))))
+```
+
+```{r, message=F, warning=F}
+gos_filt <- lapply(gos, lapply, function(x) filter(x, p.adjust < 0.05, AutopsyFraction < 0.201))
+
+gos_joint <- lapply(gos_filt, function(gt) 
+  gt %>% .[sapply(., nrow) > 0] %>% names() %>% setNames(., .) %>% 
+    lapply(function(n) cbind(gt[[n]], Type=n)) %>% Reduce(rbind, .))
+
+names(gos_joint) %>% lapply(function(n)
+  gos_joint[[n]] %>% mutate(GO=n) %>% 
+    dplyr::select(GO, Type, ID, Description, GeneRatio, AutopsyFraction, geneID, pvalue, p.adjust, qvalue)) %>% 
+  bind_rows() %>% 
+  write_csv(outPath("gene_ontology_hits.csv"))
+```
+
+```{r, fig.width=8, fig.height=25, warning=FALSE}
+# clust_info <- prepareGOHeatmapClustered(gos_joint$BP, type_order)
+# clust_info$gg
+```
+
+### Dependencies
+
+```{r}
+library(ggrepel)
+
+plotNCellRegression <- function(n, n.cell.per.type, neuron.type, n.name="N", legend.pos=c(1, 0)) {
+  p.df <- data.frame(N=n) %>% as_tibble(rownames="Type") %>% 
+    mutate(NCells=as.vector(n.cell.per.type[Type])) %>% 
+    mutate(NeuronType=neuron.type[Type])
+
+  ggplot(p.df, aes(x=NCells, y=N)) + 
+    # geom_smooth(aes(color=NeuronType), method=MASS::rlm, se=0) +
+    geom_point(aes(color=NeuronType)) + 
+    geom_label_repel(aes(label=Type), size=2, min.segment.length=0.1, box.padding=0, label.size=0, max.iter=300, fill=alpha("white", 0.4)) +
+    scale_x_log10() + 
+    scale_color_manual(values=kNtColors) +
+    ylim(0, max(p.df$N)) + labs(x="Number of cells", y=n.name) +
+    theme(legend.position=legend.pos, legend.justification=legend.pos, legend.background=element_rect(fill=alpha("white", 0.4))) +
+    guides(color=guide_legend(title="Neuron type"))
+}
+```
+
+```{r}
+n_cell_per_type <- table(annotation)
+n_gos_per_type <- sapply(gos_filt, sapply, nrow) %>% rowSums()
+n_exp_de_per_type <- sapply(de_genes_filt, length)
+```
+
+```{r, fig.width=7, fig.height=8, message=FALSE, warning=FALSE}
+plot_grid(
+  n_gos_per_type %>% 
+    plotNCellRegression(n_exp_de_per_type, neuron.type=neuron_type_per_type, n.name="Number of GO Terms") +
+    geom_smooth(method=MASS::rlm, se=0, color="black", size=0.5) +
+    scale_x_continuous(name="Number of highly-expressed DE genes"),
+  sapply(gos_filt, sapply, nrow) %>% rowSums() %>% 
+    plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name="Number of GO Terms"),
+  ncol=1, labels=c("a", "b"), label_x=0.01
+)
+
+ggsave(outPath("n_gos_vs_ns.pdf"), width=7, height=8)
+```
+
+```{r, fig.width=7, fig.height=5, message=FALSE}
+sapply(de_filtered, nrow) %>% 
+  plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name="Number of DE genes") +
+  scale_y_log10()
+ggsave(outPath("n_de_vs_n_cells.pdf"), width=7, height=5)
+
+n_exp_de_per_type %>% 
+  plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name="Number of highly-expressed DE genes") +
+  geom_smooth(aes(color=NeuronType), method=MASS::rlm, se=0, size=0.5)
+ggsave(outPath("n_de_expr_vs_n_cells.pdf"), width=7, height=5)
+
+p_df <- sapply(gos_filt, sapply, nrow) %>% as_tibble(rownames="Type") %>% 
+  reshape2::melt(id.vars="Type", variable.name="GO", value.name="N") %>% 
+  mutate(Type=factor(Type, levels=type_order))
+
+gg_n_gos <- ggplot(p_df) +
+  geom_bar(aes(x=Type, y=N, fill=GO), stat="identity") +
+  scale_y_continuous(expand=c(0, 0), limits=c(0, 300)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), 
+        panel.grid.major.x=element_blank(), legend.position=c(1, 1), legend.justification=c(1, 1)) +
+  labs(x="", y="#Pathways")
+
+gg_n_gos
+
+ggsave(outPath("n_gos_per_type.pdf"), width=7, height=5)
+```
+
+### Ranking
+
+```{r}
+n_gos_per_type <- sapply(gos_filt, sapply, nrow) %>% rowSums()
+n_exp_de_per_type <- sapply(de_genes_filt, length)
+
+reg_res <- MASS::rlm(n_exp_de_per_type, n_gos_per_type)$residuals
+n_go_rank_df <- tibble(Type=names(reg_res), Stat=reg_res, Affected=(reg_res > 0), 
+                       HighlyAffected=(reg_res %>% `>`(quantile(.[. > 0], 0.75)))) %>% 
+  mutate(Rank=setNames(-Stat, Type) %>% split(neuron_type_per_type[Type]) %>% lapply(rank) %>% Reduce(c, .) %>% .[Type], 
+         StatType="GONumber")
+```
+
+```{r}
+types_per_nt <- split(names(neuron_type_per_type), neuron_type_per_type)
+n_de_rank_df <- types_per_nt %>% lapply(function(ns) {
+  reg.res <- MASS::rlm(log10(n_cell_per_type[ns]), n_exp_de_per_type[ns])$residuals
+  tibble(Type=names(reg.res), Stat=reg.res, Affected=(reg.res > 0), 
+         HighlyAffected=(reg.res %>% `>`(quantile(.[. > 0], 0.75))), 
+         Rank=rank(-reg.res), StatType="DENumber")
+}) %>% Reduce(rbind, .)
+```
+
+```{r}
+rbind(ep_enrich_rank_df, gwas_rank_df, n_go_rank_df, n_de_rank_df) %>% 
+  write_csv(OutputPath("total_ranking", "go.csv"))
+```
+
+### Clustering
+
+```{r}
+clust_df <- clusterIndividualGOs(gos_joint$BP, 0.66) %>%
+  .[, type_order[type_order %in% colnames(.)]]
+```
+
+```{r, fig.width=8, fig.height=35, warning=FALSE}
+# plotIndividualClustersPerGO(clust_df, clust_info$order)
+```
+
+```{r, fig.width=5, fig.height=3, warning=FALSE}
+cl_dists <- pbapply(clust_df, 1, function(ct1) apply(clust_df, 1, function(ct2) {
+  mask <- !is.na(ct1) & !is.na(ct2)
+  if (sum(mask) == 0) 1 else (1 - mean(ct1[mask] == ct2[mask]))
+}))
+
+cl_clusts <- as.dist(cl_dists) %>% hclust(method="average")
+clusts <- cutree(cl_clusts, h=0.5)
+
+# split(names(clusts), clusts)
+
+c(length(clusts), length(unique(clusts)))
+plotNumberOfClustersPerHeight(cl_clusts, step=0.01)
+```
+
+```{r}
+gos_joint$BP %<>% mutate(GOClust=clusts[Description])
+
+name_per_clust <- gos_joint$BP %>% group_by(GOClust, Description) %>% summarise(pvalue=exp(mean(log(pvalue)))) %>% 
+  split(.$GOClust) %>% sapply(function(df) df$Description[which.min(df$pvalue)])
+
+gos_joint$BP %<>% mutate(GOClustName=name_per_clust[as.character(GOClust)])
+
+go_bp_summ_df <- gos_joint$BP %>% group_by(Type, GOClustName) %>% 
+  summarise(p.adjust=min(p.adjust)) %>% ungroup() %>% rename(Description=GOClustName)
+
+gos_joint$BP %$% split(Description, GOClustName) %>% lapply(unique) %>% 
+  sapply(function(x) paste0("'", x, "'", collapse="; ")) %>%
+  tibble(Group=names(.), Pathways=.) %>% write_csv(outPath("bp_pathway_clustering.csv"))
+```
+
+### Overview
+
+Supp. Figure 13:
+
+```{r, fig.width=8, fig.height=11, warning=FALSE}
+t_df <- go_bp_summ_df %>% mutate(p.adjust=-log10(p.adjust)) %>% 
+  tidyr::spread(Type, p.adjust) %>% as.data.frame() %>% set_rownames(.$Description) %>% .[, 2:ncol(.)] %>% 
+  .[, type_order[type_order %in% colnames(.)]] %>% 
+  .[rowSums(!is.na(.)) == 1,] %>% .[, colSums(!is.na(.)) > 0]
+t_df[is.na(t_df)] <- 0
+
+colored_types <- which(colSums(t_df > 0) >= 5) %>% names()
+color_per_type <- rep("black", length(type_order)) %>% setNames(type_order)
+color_per_type[colored_types] <- ifelse(neuron_type_per_type[colored_types] == "Excitatory", "red", "green")
+
+plotGOHeatmap(t_df, color_per_type, legend.position=c(2.1, 0.93)) +
+  gNtVline(neuron_type_per_type)
+ggsave(outPath("go_pvals_single.pdf"), width=8, height=11)
+```
+
+Supp. Figure 9:
+
+```{r, fig.width=8, fig.height=11, warning=FALSE}
+color_per_type <- ifelse(neuron_type_per_type == "Excitatory", "red", "green")
+clust_info <- prepareGOHeatmapClustered(go_bp_summ_df, type_order, color.per.type=color_per_type, 
+                                        cut.h=2.5, method="ward.D", min.rows.per.clust=7)
+clust_info$gg
+
+ggsave(outPath("go_pvals_shared.pdf"), width=8, height=11)
+```
+
+Figure 3b:
+
+```{r, fig.width=8, fig.height=10, warning=FALSE}
+go_per_cl <- clust_info$ann %$% 
+  split(Type, value)[as.character(unique(value[!is.na(value)]))] %>% rev()
+rel_heights <- sapply(go_per_cl, length) %>% .[1:(length(.)-1)] %>% c(22)
+
+lapply(1:length(go_per_cl), function(i) {
+  p.df <- clust_info$df[as.character(go_per_cl[[i]]),]
+  gg <- plotGOHeatmap(p.df, clust_info$color.per.type, legend.position=c(1.9, 1), row.order=T, legend.title.size=10) +
+    gNtVline(neuron_type_per_type) +
+    theme(plot.margin=margin(), legend.key.height=unit(0.2, "in"))
+
+  if (i != length(go_per_cl)) {
+    gg <- gg + theme(axis.text.x=element_blank())
+  }
+
+  if (i != 1) {
+    gg <- gg + theme(legend.position="none")
+  }
+  return(gg)
+}) %>% 
+  plot_grid(plotlist=., ncol=1, align="v", rel_heights=rel_heights)
+
+
+ggsave(outPath("f3b_go_pvals_clustered.pdf"), width=8, height=10)
+```
+
+```{r, fig.width=5, fig.height=10, message=FALSE, warning=FALSE}
+gpt_mats <- go_per_cl[[2]] %>% as.character() %>% setNames(., .) %>% 
+  lapply(getGenePathwayMatrix, gos_joint$BP, de_filtered)
+
+names(gpt_mats) %>% pblapply(function(gon) {
+  p.df <- gpt_mats[[gon]] %>% pmax(-10) %>% pmin(10) %>% 
+    t() %>% .[rowSums(abs(.) > 0.1) > 1,]
+  cl.info <- estimateHeatmapClusters(abs(p.df) > 0.1, cut.h=0.5, min.rows.per.clust=3, distance="binary",
+                                     neuron.type.per.type=neuron_type_per_type)
+
+  gg <- plotGOHeatmap(p.df, col.order=type_order, legend.title="Z-score", row.order=cl.info$order) +
+    scale_fill_distiller(palette="RdBu", limits=c(-10, 10)) +
+    gNtVline(neuron_type_per_type) +
+    geom_rect(aes(xmin=x1, xmax=x2, ymin=y1 + 0.5, ymax=y2 + 0.5), cl.info$rect, color="black", fill="transparent", size=1) +
+    ggtitle(gon)
+  
+  ggsave(outPath("pathway_clustering", paste0(gon, ".pdf")), gg, width=6, height=nrow(p.df) * 0.12 + 2)
+
+  gg
+})
+```
+
+### Embeddings of pathways
+
+```{r}
+gp_embs <- clust_info$ann %$% split(Type, value) %>% lapply(as.character) %>% 
+  pblapply(embedPathwayTypesUmap, gos_joint$BP, spread=1.5, min_dist=0.2)
+```
+
+```{r, fig.width=9, fig.height=7}
+ggs <- lapply(gp_embs, function(emb) {
+  plot.df <- as_tibble(emb, rownames="Name") %>% 
+    mutate(Type=sapply(strsplit(Name, "!"), `[`, 2), Pathway=sapply(strsplit(Name, "!"), `[`, 1)) %>% 
+    dplyr::rename(X=V1, Y=V2) %>% 
+    mutate(NeuronType=neuron_type_per_type[Type], Type=factor(Type, levels=type_order))
+  p.theme <- theme(axis.text=element_blank(), axis.title=element_blank(), 
+                   axis.ticks=element_blank(), plot.margin=margin(), legend.justification="top",
+                   legend.key.size=unit(10, "pt"), legend.key=element_blank(),
+                   legend.position="bottom", legend.direction="vertical")
+  point.size <- 1.75
+  point.alpha <- 0.75
+
+  color.vals <- type_order %>% split(neuron_type_per_type[.]) %>% 
+    lapply(sccore::fac2col) %>% lapply(sample) %>% unlist(use.names=F)
+  cowplot::plot_grid(
+    ggplot(plot.df) + 
+      geom_point(aes(x=X, y=Y, color=Type, shape=NeuronType), size=point.size, alpha=point.alpha) +
+      scale_shape_manual(values=c(17, 19)) +
+      scale_color_manual(values=color.vals) +
+      p.theme
+    ,
+    ggplot(plot.df, aes(x=X, y=Y, shape=NeuronType)) + 
+      geom_point(aes(color=Pathway), size=point.size, alpha=point.alpha) +
+      scale_shape_manual(values=c(17, 19), guide=F) +
+      p.theme
+    , ncol=2, align="h"
+    )
+})
+
+for (i in 1:length(ggs)) {
+  ggsave(outPath("pathway_clustering", paste0("cluster", i, "_umap.pdf")), ggs[[i]], width=9, height=7)
+}
+
+ggs
+```
+
+### Clustering cell types by GO
+
+```{r, message=FALSE, warning=FALSE, fig.width=7.5, fig.height=7}
+p_mat <- estimateTypeSimilarityOverPathways(gos_filt["BP"])
+t_cpt <- setNames(kNtColors[neuron_type_per_type], names(neuron_type_per_type))
+plotTypeSimilarityOverPathways(p_mat, 1.2, color.per.type=t_cpt, max.val=0.4)
+
+ggsave(outPath("type_clustering_by_go.pdf"))
+```
+
+### AMPA
+
+```{r}
+cm_collapsed <- conos:::collapseCellsByType(Matrix::t(cm_merged), annot_filt, min.cell.count=0)
+cm_collapsed_norm <- cm_collapsed / rowSums(cm_collapsed)
+```
+
+```{r, fig.width=8, fig.height=11, message=FALSE}
+ampa_info <- getPathwayGeneExpression(de, "AMPA glutamate receptor complex", gos$CC, cm.collapsed=cm_collapsed_norm, 
+                                      type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+glutamate_info <- getPathwayGeneExpression(de, "glutamate receptor signaling pathway", gos$BP, cm.collapsed=cm_collapsed_norm, 
+                                           type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+action_info <- getPathwayGeneExpression(de, "action potential", gos$BP, cm.collapsed=cm_collapsed_norm, 
+                                        type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+
+ggsave(outPath("gene_scattermaps", "ampa_genes.pdf"), ampa_info$gg, width=8, height=3.5)
+ggsave(outPath("gene_scattermaps", "glutamate_genes.pdf"), glutamate_info$gg, width=8, height=7)
+ggsave(outPath("gene_scattermaps", "action_genes.pdf"), action_info$gg, width=8, height=6)
+
+p_theme_base <- theme(plot.margin=margin(), axis.text.y=element_text(size=7))
+cowplot::plot_grid(
+  ampa_info$gg + theme(legend.position="none", axis.text.x=element_blank(), axis.ticks.x=element_blank()) + p_theme_base,
+  glutamate_info$gg + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + p_theme_base,
+  action_info$gg + theme(legend.position="none") + p_theme_base,
+  ncol=1, align="v", axis="rl", rel_heights=c(0.6, 1.7, 2)
+)
+```
+
+```{r, fig.width=7, fig.height=4}
+total_df <- data.frame(Action=colSums((abs(action_info$stat) > 3) & (action_info$expr > 0.5)), 
+                       Glutamate=colSums((abs(glutamate_info$stat) > 3) & (glutamate_info$expr > 0.5)), 
+                       AMPA=colSums((abs(glutamate_info$stat) > 3) & (glutamate_info$expr > 0.5))) %>% 
+  as_tibble(rownames="Type") %>% reshape2::melt(id.var="Type", variable.name="Pathway") %>% 
+  mutate(Type=factor(Type, levels=type_order))
+
+ggplot(total_df) +
+  geom_bar(aes(x=Type, y=value, fill=Pathway), stat="identity") +
+  scale_y_continuous(expand=c(0, 0), limits=c(0, 50)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), panel.grid.major.x=element_blank()) +
+  theme_pdf(legend.pos=c(1, 1)) + labs(x="", y="#Genes")
+
+ggsave(outPath("n_de_genes.pdf"))
+```
