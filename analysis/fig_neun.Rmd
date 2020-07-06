@@ -1,0 +1,74 @@
+---
+title: "NeuN- dataset"
+output: html_notebook
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, message=FALSE, warning=FALSE}
+# library(Epilepsy19)
+library(ggplot2)
+library(magrittr)
+library(Matrix)
+library(pbapply)
+library(conos)
+library(CellAnnotatoR)
+library(readr)
+library(tidyverse)
+library(pheatmap)
+
+theme_set(theme_bw())
+
+devtools::load_all()
+
+outPath <- function(...) OutputPath("fig_neun", ...)
+```
+
+```{r, message=FALSE}
+marker_path <- MetadataPath("neuron_markers.md")
+
+cms_all <- CachePath("count_matrices.rds") %>% read_rds()
+
+annotation <- read_csv(MetadataPath("annotation.csv")) %$% lapply(., setNames, cell)
+```
+
+## NeuN-
+
+```{r}
+cm_neun <- cms_all$NeuN
+p2_neun <- GetPagoda(cm_neun)
+clusters_neun <- p2_neun$clusters$PCA$leiden
+
+embeddingPlot(p2_neun$embeddings$PCA$tSNE, groups=clusters_neun)
+```
+
+### Annotation
+
+```{r, fig.width=5, fig.height=5, message=FALSE}
+annotation_neun <- read_csv(MetadataPath("annotation_neun.csv")) %$% setNames(l1, cell)
+embeddingPlot(p2_neun$embeddings$PCA$tSNE, groups=annotation_neun, raster=T, raster.dpi=100)
+
+ggsave(outPath("embedding_neun_neg.pdf"))
+```
+
+```{r, fig.width=5, fig.height=4, message=FALSE}
+p_df <- as_tibble(table(Type=annotation_neun)) %>% mutate(Frac=n / sum(n))
+ggplot(p_df, aes(x=Type)) +
+  geom_bar(aes(y=n), stat="identity", position="dodge") +
+  scale_y_continuous(expand=expansion(c(0, 0.05))) +
+  geom_text(aes(y=n + 50, label=paste0("  ", round(Frac * 100, 1), "%"))) +
+  labs(x="", y="#Cells") +
+  theme(legend.position=c(1, 1), legend.justification=c(1, 1), 
+        panel.grid.major.x=element_blank(), axis.text.x=element_text(angle=30, hjust=1))
+
+ggsave(outPath("n_cells_neun_neg.pdf"))
+```
+
+```{r, fig.width=6, fig.height=6, message=FALSE}
+c("Aqp4", "Ctss", "C1qb", "Mog", "Mag", "Itih5", "Pdgfra", "Gad2", "Slc17a7") %>% toupper() %>% 
+  plotGeneExpression(p2_neun$embeddings$PCA$tSNE, p2_neun$counts, build.panel=F, raster=T,
+                     raster.width=4, raster.height=4, raster.dpi=100) %>% 
+  lapply(`+`, theme(plot.title=element_blank(), plot.margin=margin())) %>% 
+  cowplot::plot_grid(plotlist=., labels=names(.), label_x=-0.05)
+
+ggsave(outPath("markers_neun_neg.pdf"))
+```
