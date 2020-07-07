@@ -460,8 +460,16 @@ lapply(1:length(go_per_cl), function(i) {
 ggsave(outPath("f3b_go_pvals_clustered.pdf"), width=8, height=10)
 ```
 
+```{r}
+top_clust <- clust_info$ann %$% split(as.character(Type), value) %>% 
+  sapply(function(x) sum(go_bp_summ_df$Description %in% x)) %>% 
+  which.max() %>% names()
+
+as.character(go_per_cl[[top_clust]])
+```
+
 ```{r, fig.width=5, fig.height=10, message=FALSE, warning=FALSE}
-gpt_mats <- go_per_cl[[2]] %>% as.character() %>% setNames(., .) %>% 
+gpt_mats <- go_per_cl[[top_clust]] %>% as.character() %>% setNames(., .) %>% 
   lapply(getGenePathwayMatrix, gos_joint$BP, de_filtered)
 
 names(gpt_mats) %>% pblapply(function(gon) {
