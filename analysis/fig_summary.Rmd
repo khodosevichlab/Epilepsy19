@@ -22,7 +22,7 @@ all_stat_df <- read_csv(OutputPath("total_ranking", "go.csv")) %>%
 
 write_csv(all_stat_df, OutputPath("total_ranking", "total.csv"))
 
-stat_weights = c(Similarity=1.0, CellNumber=0.66, GWAS=0.66, DENumber=0.33, GONumber=0.33, EPEnrichment=0.33)
+stat_weights = c(Similarity=1.0, CellNumber=0.66, GWAS=0.66, DENumber=0.66, GONumber=0.66, EPEnrichment=0.33)
 
 aggr_type_score <- all_stat_df %>% split(.$Type) %>% 
   sapply(function(x) sum(x$AffectionLevel * stat_weights[x$StatType])) %>% 
@@ -64,7 +64,7 @@ gg_ranks <- ggplot(all_stat_df) +
 plot_grid(
   ggdraw(gg_ranks + theme(legend.position="none", plot.margin=margin(r=10, t=10)) +
          draw_plot(gg_stat_weights + theme_nothing(), 
-                   x=length(type_order) - 0.25, y=-5.9, height=6.25, width=1, vjust=-1) +
+                   x=length(type_order) + 0.5, y=-5.9, height=6.25, width=1, vjust=-1) +
          draw_plot(gg_score + theme_nothing(), 
                    x=0.25, y=6.25, height=0.3, width=length(type_order) - 0.5, vjust=-1)),
   plot_grid(
