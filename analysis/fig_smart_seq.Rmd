@@ -1,6 +1,7 @@
 ---
 title: "Analysis of Smart-Seq2 data"
 output: html_notebook
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 ---
 
 ```{r, message=FALSE, warning=FALSE}
