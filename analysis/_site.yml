@@ -13,5 +13,7 @@ output:
   workflowr::wflow_html:
     toc: yes
     toc_float: yes
+    toc_depth: 4
     theme: cosmo
     highlight: textmate
+    df_print: kable
