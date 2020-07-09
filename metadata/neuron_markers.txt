@@ -1,0 +1,292 @@
+# Neurons
+
+>Inhibitory
+expressed: GAD1, GAD2, SOX6, PVALB, SST, VIP, LHX6, NDNF, CALB2, SULF1
+not expressed: SLC17A7, SATB2
+
+>Excitatory
+expressed: SLC17A7, SATB2, RORB, CUX2, TLE4, NR4A2, SEMA3C
+not expressed: GAD1, GAD2, SOX6, PVALB
+
+# Inhibitory
+
+>Id2
+expressed: ID2, LAMP5, CALB2, PAX6, RELN, SV2C, COL5A2, SEMA3C, FAM19A1, SPOCK1, MYO5B
+not expressed: VIP, TAC3, FAM89A, NPR3, SST, LHX6
+subtype of: Inhibitory
+
+>Pvalb
+expressed: PVALB, NOS1, SULF1, LHX6, KCNS3, CRH, PLEKHH2, LGR5
+not expressed: LAMP5, ID2, SST, FAM89A, RELN, SEMA6A, TAC3, DDR2, VIP
+subtype of: Inhibitory
+
+>Sst
+expressed: SST, NOS1, SEMA6A, FAM89A, LHX6, GRIK1
+not expressed: VIP, CALB2, CRH, CHAT, CCK, LAMP5, ID2, SV2C, PDGFD, PVALB, KCNS3, ADORB1
+subtype of: Inhibitory
+
+>Vip
+expressed: VIP, TAC3, CALB2, LAMA3, FAM19A1, NPR3
+not expressed: NOS1, LAMP5, PDGFD, SV2C, LHX6, NXPH1, ID2
+subtype of: Inhibitory
+
+## Id2
+
+>Id2_Lamp5
+expressed: LAMP5, PDGFD, SV2C
+not expressed: PAX6, CALB2
+subtype of: Id2
+
+>Id2_Nckap5
+expressed: CALB2, SYNPR, NCKAP5
+not expressed: LAMP5, SV2C, PAX6
+subtype of: Id2
+
+>Id2_Pax6
+expressed: PAX6, NXPH1, GRIN2A
+not expressed: LAMP5, SV2C
+subtype of: Id2
+
+### Id2_Lamp5
+
+>Id2_Lamp5_Nos1
+expressed: NOS1, SFRP1, LHX6, SULF1
+not expressed: LAMA3
+subtype of: Id2_Lamp5
+
+>Id2_Lamp5_Crh
+expressed: CRH, SFRP1, ID2, LAMA3
+not expressed: LHX6, SULF1
+subtype of: Id2_Lamp5
+
+>Id2_Lamp5_Nmbr
+expressed: RELN, LAMA3
+not expressed: ID2
+subtype of: Id2_Lamp5
+
+## Pvalb
+
+>Pvalb_Nos1
+expressed: NOS1, CALB1 # LHX6
+not expressed: CRH, NOG, UNC5B, NPNT #, CA8
+subtype of: Pvalb
+
+>Pvalb_Sulf1
+expressed: SULF1, MEPE # LHX6, CPED1
+not expressed: CRH, NOG, UNC5B, NPNT, NOS1, CALB1, LGR5
+subtype of: Pvalb
+
+>Pvalb_Lgr5
+expressed: LGR5, MEPE # LHX6, CPED1
+not expressed: CRH, NOG, UNC5B, NPNT, NOS1, CALB1, SULF1
+subtype of: Pvalb
+
+>Pvalb_Crh
+expressed: CRH, NOG, UNC5B, NPNT # PLEKHH2, CA8
+not expressed: NOS1, CALB1 #, RGS5, LHX6
+subtype of: Pvalb
+
+## Sst
+
+>Sst_Th
+expressed uniq: TH
+expressed: GABRG3 # FBN2
+not expressed: TAC3, THSD7B, CALB1, HPGD, TAC1
+subtype of: Sst
+
+>Sst_Tac3
+expressed: TAC3, GABRG3, RELN
+not expressed: TH, STK32A, HPGD, SCGZ
+subtype of: Sst
+
+>Sst_Tac1
+expressed uniq: TAC1
+expressed: TAC3, GABRG3
+not expressed: RELN, TH, FBN2, CALB1, GXYLT2, NOS1
+subtype of: Sst
+
+>Sst_Stk32a
+expressed: STK32A, RELN, GXYLT2
+not expressed: TH, TAC3, FBN2, HPGD
+subtype of: Sst
+
+>Sst_Nos1
+expressed: GXYLT2, FBN2, CALB1, NOS1
+not expressed: TH, TAC3, HPGD, SGCZ, GABRG3
+subtype of: Sst
+
+>Sst_Calb1
+expressed: HPGD, CALB1, FBN2
+not expressed: TAC3, TH, GXYLT2, ADGRG6
+subtype of: Sst
+
+>Sst_Isoc1
+expressed uniq: THSD7B
+expressed: SGCD, GABRG3
+not expressed: RELN, SOX6
+subtype of: Sst
+
+## Vip
+
+>Vip_Abi3bp
+expressed uniq: ABI3BP
+expressed: GRM1
+not expressed: ZMAT4
+subtype of: Vip
+
+>Vip_Tyr
+expressed: TOX2, LUZP2, TYR
+not expressed: ZMAT4, HTR2C
+subtype of: Vip
+
+>Vip_Crh
+expressed: CRH
+not expressed: SEMA3C, SEMA6A, HTR2C, TOX2
+subtype of: Vip
+
+>Vip_Sstr1
+expressed: TRPM3, SSTR1
+# expressed: PLCXD3, MAML3
+# not expressed: RELN, ZNF804A, ADAM33
+not expressed: CRH, NRG1
+subtype of: Vip
+
+>Vip_Sema3c
+expressed: THSD7B, PENK, SEMA3C, ADAMTSL1
+not expressed: KCNQ5, CRH, RELN, ADAM33, PTPRK
+# not expressed: ZMAT4
+subtype of: Vip
+
+>Vip_Nrg1
+expressed: NRG1, GGH, SGCZ
+not expressed: KCNQ5, PENK, CRH, CNTN5
+subtype of: Vip
+
+>Vip_Cbln1
+expressed: HTR2C, CBLN1
+not expressed: FSTL5, PENK
+subtype of: Vip
+
+# Excitatory
+
+>L2_3_Cux2
+expressed uniq: LAMP5, LAMA2
+expressed: CUX2, PDGFD, FREM3, COL5A2
+not expressed: GABRG1, TLL1, GRIN3A
+subtype of: Excitatory
+
+>L4_Rorb
+expressed uniq: MME
+expressed: RORB, COBLL1, SCHLAP1, PLCH1
+not expressed: PDGFD, PXDN, OPRK1, COL5A2
+subtype of: Excitatory
+
+>L5_6_Themis
+expressed: THEMIS, NR4A2, PXDN, OPRK1
+not expressed: CUX2, RORB
+subtype of: Excitatory
+
+>L5_6_Fezf2
+expressed uniq: CMTM8, FEZF2
+expressed: TLE4, LRRK1, ADRA1A, RORB
+not expressed: CUX2, SCHLAP1, COBLL1
+subtype of: Excitatory
+
+## L2_3_Cux2
+
+>L2_Cux2_Lamp5
+expressed: LAMP5, PARD3, PDGFD, LTK, DCC
+not expressed: COBLL1, PLCH1, RORB, GABRG1, COL5A2, NTNG1, FREM3, LAMA2, GLIS3
+subtype of: L2_3_Cux2
+
+>L2_3_Cux2_Frem3
+expressed: FREM3, AGBL1, GPC6, LAMA2, GLIS3
+not expressed: PRSS12, COBLL1, PLCH1, RORB, DCC, LAMP5, PARD3, PDGFD, LTK, COL5A2, CCBE1
+subtype of: L2_3_Cux2
+
+>L3_Cux2_Prss12
+expressed: PRSS12, COBLL1, PLCH1, RORB, DCC, LAMA2, COL5A2
+not expressed: LAMP5, PARD3, PDGFD
+subtype of: L2_3_Cux2
+
+# ### L2_Cux2_Lamp5
+# 
+# >L2_Cux2_Lamp5_Pdgfd
+# expressed: PDGFD, DCC, ACVR1C
+# not expressed: FREM3
+# subtype of: L2_Cux2_Lamp5
+# 
+# >L2_Cux2_Lamp5_March1
+# expressed: MARCH1, FREM3, PARD3, CCBE
+# not expressed: PDGFD, DCC
+# subtype of: L2_Cux2_Lamp5
+
+## L4_Rorb
+
+>L4_Rorb_Mme
+expressed: MME, PLCH1, COL22A1
+not expressed: ARHGAP15, GABRG1, MET, TPBG
+subtype of: L4_Rorb
+
+>L4_Rorb_Met
+expressed: MET, GABRG1, TPBG, COBLL1
+not expressed: ARHGAP15, COL22A1, TLL1
+subtype of: L4_Rorb
+
+>L4_Rorb_Arhgap15
+expressed: ARHGAP15, ADGRL4, TLL1, TPBG
+not expressed: MME, MET
+subtype of: L4_Rorb
+
+## L5_6_Themis
+
+>L5_6_Themis_Sema3a
+expressed: SEMA3A, PXDN, GRIK3
+not expressed: NR4A2, DCSTAMP, NTNG2
+subtype of: L5_6_Themis
+
+>L5_6_Themis_Ntng2
+expressed: NR4A2, DCSTAMP, NTNG2
+not expressed: SEMA3A, PXDN, GRIK3
+subtype of: L5_6_Themis
+
+## L5_6_Fezf2
+
+> L5_6_Fezf2_Lrrk1
+expressed: LRRK1, ARSJ, CAMK2D
+not expressed: TLE4, SEMA5A, HTR2C
+subtype of: L5_6_Fezf2
+
+> L5_6_Fezf2_Tle4
+expressed: TLE4, SEMA3A, HTR2C, SEMA5A
+not expressed: LRRK1
+subtype of: L5_6_Fezf2
+
+### L5_6_Fezf2_Tle4
+
+> L5_6_Fezf2_Tle4_Abo
+expressed: ABO, SEMA5A
+not expressed: HTR2C
+subtype of: L5_6_Fezf2_Tle4
+
+> L5_6_Fezf2_Tle4_Htr2c
+expressed: HTR2C, IL26, CARD11, KCNIP1
+not expressed: ABO, SCUBE1
+subtype of: L5_6_Fezf2_Tle4
+
+> L5_6_Fezf2_Tle4_Scube1
+expressed: SCUBE1, NR4A2, CDH10, SLC15A5
+not expressed: ABO, HTR2C, SEMA5A
+subtype of: L5_6_Fezf2_Tle4
+
+### L5_6_Fezf2_Lrrk1
+
+> L5_6_Fezf2_Lrrk1_Pcp4
+expressed: PCP4, SLIT3
+not expressed: SEMA3E, TSHZ2
+subtype of: L5_6_Fezf2_Lrrk1
+
+> L5_6_Fezf2_Lrrk1_Sema3e
+expressed: SEMA3E, TSHZ2
+not expressed: PCP4, SLIT3
+subtype of: L5_6_Fezf2_Lrrk1

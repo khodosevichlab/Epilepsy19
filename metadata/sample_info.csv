@@ -1,0 +1,20 @@
+Name,Alias,Protocol,Sex
+Biopsy,C1,10x v3,male
+c_p1,C2,10x v2,male
+c_p2,C3,10x v2,male
+c_p3,C4,10x v2,female
+c_p4,C5,10x v2,female
+GTS217_2,C6,10x v3,male
+GTS219,C7,10x v2,male
+GTS233,C8,10x v3,male
+CTR215,C9,10x v3,female
+CTR240,C10,10x v3,female
+ep_p1,E1,10x v2,female
+ep_p2,E2,10x v2,male
+ep_p3,E3,10x v2,male
+HB26,E4,10x v3,female
+HB51,E5,10x v2,female
+HB52,E6,10x v2,male
+HB53,E7,10x v2,female
+HB56,E8,10x v2,female
+HB65,E9,10x v3,male

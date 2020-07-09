@@ -84,7 +84,7 @@ sapply(cms, ncol)
 Doublet detection:
 
 ```{r}
-doublet_info <- pblapply(cms, GetScrubletScores, "~/local/anaconda3/bin/python3.7", 
+doublet_info <- pblapply(cms, GetScrubletScores, "~/mh/local/anaconda3/bin/python3.7", 
                          min.molecules.per.gene=50, cl=25)
 ```
 

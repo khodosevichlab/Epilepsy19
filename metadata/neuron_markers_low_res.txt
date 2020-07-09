@@ -1,0 +1,37 @@
+# Main
+
+>Neurons
+expressed: SYT1, SYP, SNAP25, RBFOX3, GAD1, GAD2, SLC17A7, SATB2
+not expressed: SLC17A7, SATB2, AQP4, MOG, MAG, CTSS, C1QB, CSPG4, ITIH5
+
+>Astrocytes
+expressed: AQP4, GJB6, FGFR3
+not expressed: GAD1, GAD2, SATB2, SLC17A7
+
+>Microglia
+expressed: CTSS, C1QB
+not expressed: GAD1, GAD2, SATB2, SLC17A7
+
+>Oligodendrocytes
+expressed: MOG, MAG
+not expressed: GAD1, GAD2, SATB2, SLC17A7
+
+>Oligodendrocyte Precursors
+expressed: CSPG4, PDGFRA, VCAN
+not expressed: GAD2, SATB2, SLC17A7
+
+>Vascular
+expressed: DCN, PTGDS, ATP1A2, ITIH5, FLT1
+not expressed: GAD1, GAD2, SATB2, SLC17A7
+
+# Neurons
+
+>Inhibitory
+expressed: GAD1, GAD2, SOX6, PVALB, SST, VIP, LHX6, NDNF, CALB2, SULF1
+not expressed: SLC17A7, SATB2
+subtype of: Neurons
+
+>Excitatory
+expressed: SLC17A7, SATB2, RORB, CUX2, TLE4, NR4A2, SEMA3C
+not expressed: GAD1, GAD2, SOX6, PVALB
+subtype of: Neurons
