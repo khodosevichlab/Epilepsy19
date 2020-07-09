@@ -1,0 +1,113 @@
+---
+title: "Pre-processing of new datasets"
+output: html_notebook
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, message=FALSE, warning=FALSE}
+# library(Epilepsy19)
+library(ggplot2)
+library(magrittr)
+library(Matrix)
+library(pbapply)
+library(conos)
+
+devtools::load_all()
+
+theme_set(theme_bw())
+```
+
+Load data:
+
+```{r}
+cms <- list.files(DataPath(""), pattern="*.h5") %>% setNames(., gsub(".h5", "", .)) %>% 
+  pblapply(function(p) DataPath(p) %>% Seurat::Read10X_h5() %>% .[, colSums(.) > 10])
+```
+
+Filter small cells:
+
+```{r, fig.width=12, fig.height=13}
+thresholds <- c(Biopsy=3.05, GTS213=2.5, GTS217=1.0, GTS217_2=3.2, GTS219=2.5, GTS233=3.0, 
+                HB26=3.4, HB51=3.2, HB52=2.85, HB53=3.1, HB56=2.75, HB65=2.85, NeuN=3.0, 
+                CTR215=2.7, CTR240=3.0)
+
+lapply(names(cms), function(n) 
+  dropestr::PlotCellsNumberHist(colSums(cms[[n]]), estimate.cells.number=T, show.legend=F) + 
+    geom_vline(aes(xintercept=thresholds[[n]]))) %>% 
+  cowplot::plot_grid(plotlist=., ncol=3, labels=names(cms))
+```
+
+```{r}
+cms <- names(cms) %>% setNames(., .) %>% 
+  pblapply(function(n) cms[[n]] %>% .[, colSums(.) >= 10**thresholds[[n]]])
+```
+
+Append matrices from the previous runs:
+
+```{r}
+cm_paths_old <- list.files(DataPath(""), pattern=".*_p.*") %>% 
+  setNames(., .) %>% sapply(DataPath)
+
+cms_old <- pbapply::pblapply(cm_paths_old, pagoda2::read.10x.matrices, verbose=F, cl=10)
+
+cms %<>% c(cms_old)
+sapply(cms, ncol)
+```
+
+```{r}
+sapply(cms, ncol) %>% .[!names(.) %in% c("GTS217", "NeuN")] %>% sum()
+```
+
+Mitochondrial fraction:
+
+```{r}
+mit_frac_per_dataset <- pblapply(cms, function(cm) 
+  colSums(cm[grep("MT-", rownames(cm)), ]) / colSums(cm))
+```
+
+```{r, fig.width=12, fig.height=12}
+lapply(mit_frac_per_dataset, function(fr) 
+  qplot(fr[fr < 0.5], xlab="Mit. fraction", ylab="#Cells", xlim=c(-0.01, 0.5), bins=30)) %>% 
+  cowplot::plot_grid(plotlist=., ncol=4, labels=names(cms))
+```
+
+```{r}
+cms <- pbmapply(function(cm, frac) cm[, frac < 0.08], cms, mit_frac_per_dataset) %>% 
+  setNames(names(cms))
+
+cms$GTS213 <- NULL
+cms$GTS217 <- NULL
+
+sapply(cms, ncol)
+```
+
+Doublet detection:
+
+```{r}
+doublet_info <- pblapply(cms, GetScrubletScores, "~/local/anaconda3/bin/python3.7", 
+                         min.molecules.per.gene=50, cl=25)
+```
+
+```{r}
+is_doublet <- lapply(doublet_info, `[[`, "score") %>% sapply(`>`, 0.25)
+sapply(is_doublet, mean) %>% round(3)
+```
+
+## Filter matrices
+
+```{r}
+cms_filt <- cms
+for (n in names(cms_filt)) {
+  cms_filt[[n]] %<>% .[!grepl("^MT-", rownames(.)), !is_doublet[[n]]]
+}
+
+sapply(cms_filt, dim)
+sapply(cms_filt, ncol) %>% .[names(.) != "NeuN"] %>% sum()
+```
+
+## Save data
+
+```{r, eval=FALSE}
+readr::write_rds(cms_filt, CachePath("count_matrices.rds"))
+```
+

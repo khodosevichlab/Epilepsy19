@@ -1,0 +1,142 @@
+---
+title: "Conos alignment of all datasets"
+output: html_notebook
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+---
+
+```{r, message=FALSE, warning=FALSE}
+# library(Epilepsy19)
+library(dataorganizer)
+library(magrittr)
+library(Matrix)
+library(pbapply)
+library(conos)
+library(readr)
+library(tidyverse)
+
+theme_set(theme_bw())
+
+devtools::load_all()
+```
+
+```{r, message=FALSE}
+annotation <- read_csv(MetadataPath("annotation.csv"))
+
+cms_all <- CachePath("count_matrices.rds") %>% read_rds()
+cms_all <- names(cms_all) %>% setNames(., .) %>% lapply(function(n)
+  cms_all[[n]] %>% set_colnames(paste0(n, "_", colnames(.))) %>% 
+    set_rownames(make.unique(rownames(.))))
+
+cms_all$NeuN <- NULL
+```
+
+## Filter cells
+
+```{r}
+cms_filt <- cms_all %>% lapply(function(cm) cm[, (colnames(cm) %in% annotation$cell)])
+
+p2s_filt <- lapply(cms_filt, GetPagoda, graph.k=10, embeding.type="UMAP", n.cores=30,
+                   spread=5, min.dist=1.0, build.graph=F)
+
+con_filt <- conos::Conos$new(p2s_filt, n.cores=30)
+sample_per_cell <- con_filt$getDatasetPerCell()
+condition_per_sample <- ifelse(grepl("ep|HB", levels(sample_per_cell)), "epilepsy", "control") %>%
+  setNames(levels(sample_per_cell))
+
+con_filt$buildGraph(k=50, k.self=5, k.self.weight=0.1, same.factor.downweight=0.25, 
+                    k.same.factor=5, balancing.factor.per.sample=condition_per_sample)
+con_filt$embedGraph(method="UMAP", n.cores=45, min.prob.lower=1e-5, n.neighbors=30, 
+                    n.epochs=1000, spread=5, min.dist=1.0, verbose=T)
+```
+
+```{r, eval=FALSE}
+write_rds(con_filt, CachePath("con_filt_cells.rds"))
+```
+
+## Filter samples
+
+```{r, eval=FALSE}
+bad_samples <- c("C3", "C5", "E5")
+
+con_sf <- Conos$new(con_filt$samples[!(names(con_filt$samples) %in% bad_samples)], n.cores=30)
+
+con_sf$buildGraph(verbose=T, var.scale=T, k=40, k.self=5, k.self.weight=0.1, 
+                  balancing.factor.per.sample=condition_per_sample, k.same.factor=5, 
+                  same.factor.downweight=0.25)
+con_sf$findCommunities(method=conos::leiden.community, resolution=10)
+con_sf$embedGraph(method="UMAP", spread=5, min.dist=1.0, n.epochs=2000, verbose=T, 
+                  n.cores=30, min.prob.lower=1e-5)
+```
+
+```{r, eval=FALSE}
+write_rds(con_sf, CachePath("con_filt_samples.rds"))
+```
+
+## Save Pagoda 2 objects
+
+```{r}
+# con_sf <- read_rds(CachePath("con_filt_samples.rds"))
+# con_filt <- read_rds(CachePath("con_filt_cells.rds"))
+```
+
+```{r}
+# p2_con <- Pagoda2FromConos(con_sf, n.pcs=0)
+# go_env <- pagoda2::p2.generate.human.go(p2_con)
+# 
+# go_sets <- ExtractGoSets(go_env)
+```
+
+### Conos
+
+Filtered samples:
+
+```{r}
+# t_anns <- lapply(annotation[2:4], setNames, annotation$cell) %>% 
+#   lapply(`[`, names(p2_con$clusters$dataset))
+# metadata <- ConvertMetadataToPagoda2Format(
+#   AnnotationL1=t_anns$l1, AnnotationL2=t_anns$l2, 
+#   AnnotationL3=t_anns$l3, Dataset=p2_con$clusters$dataset
+# )
+# 
+# p2_web <- GetPagodaWebApp(p2_con, con_sf$clusters$leiden$groups, 
+#                           additional.metadata=metadata, go.sets=go_sets, go.env=go_env)
+# 
+# show.app(p2_web, "Samples Filtered")
+# p2_web$serializeToStaticFast(CachePath("p2s", "con_filt_samples.bin"));
+```
+
+Filtered cells:
+
+```{r}
+# con_filt$findCommunities(method=leiden.community, resolution=10, n.iterations=10)
+# p2_con_filt <- Pagoda2FromConos(con_filt, n.pcs=0)
+# t_anns <- lapply(annotation[2:4], setNames, annotation$cell) %>% lapply(`[`, names(p2_con_filt$clusters$dataset))
+# metadata <- ConvertMetadataToPagoda2Format(AnnotationL1=t_anns$l1, AnnotationL2=t_anns$l2,
+#                                            AnnotationL3=t_anns$l3, Dataset=p2_con_filt$clusters$dataset)
+# 
+# p2_web_filt <- GetPagodaWebApp(p2_con_filt, con_filt$clusters$leiden$groups, additional.metadata=metadata,
+#                                go.sets=go_sets, go.env=go_env)
+# 
+# # show.app(p2_web_filt, "Cells Filtered")
+# p2_web_filt$serializeToStaticFast(CachePath("p2s", "con_filt_cells.bin"));
+```
+
+### Individual
+
+```{r}
+# p2 <- con_filt$samples[[1]]
+# p2s_web <- lapply(con_filt$samples, function(p2) {
+#   p2$makeKnnGraph(k=30, type="PCA", center=T, distance="cosine", weight.type="none", verbose=F)
+#   p2$getKnnClusters(type="PCA", method=leiden.community, resolution=7, n.iterations=10, name="leiden")
+# 
+#   t_anns <- lapply(annotation[2:4], setNames, annotation$cell) %>% lapply(`[`, names(p2$clusters$PCA$leiden))
+#   metadata <- ConvertMetadataToPagoda2Format(AnnotationL1=t_anns$l1, AnnotationL2=t_anns$l2, AnnotationL3=t_anns$l3)
+#   GetPagodaWebApp(p2, p2$clusters$PCA$leiden, additional.metadata=metadata, go.sets=go_sets, go.env=go_env)
+# })
+```
+
+```{r}
+# for (n in names(p2s_web)) {
+#   p2s_web[[n]]$serializeToStaticFast(CachePath("p2s", paste0(n, ".bin")));
+# }
+```
