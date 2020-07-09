@@ -1,0 +1,245 @@
+---
+title: 'Epilepsy 10x samples - preprocess for WGCNA'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+
+# Setup
+
+## reference
+
+conos vignette https://github.com/hms-dbmi/conos/blob/master/vignettes/walkthrough.md
+
+## Options
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1, 
+        verbose=F,
+        mc.cores=20,# for parallel computation
+        max.print= 100, width = 50
+        ) 
+```
+
+## Load packages
+
+```{r}
+library("here")
+library("dplyr")
+library("Matrix") 
+library("parallel")
+library("Seurat")
+library("data.table")
+library("conos")
+library("pagoda2") # conos dependency
+```
+
+## Set constants
+
+```{r}
+flagDate = substr(gsub("-","",as.character(Sys.Date())),3,1000)
+dirProject ="/projects/jonatan/tmp-epilepsy/"
+prefixData = "ep_10x_v2"
+prefixRun = "1"
+randomSeed = 12345
+set.seed(seed = randomSeed)
+npcs = 5
+```
+
+# download and load data
+
+## download 
+
+```{r}
+url_conosObj <- "http://pklab.med.harvard.edu/viktor/data/epilepsy/con_filt_samples_10x.rds.gz"
+url_cell_annotation <- "http://pklab.med.harvard.edu/viktor/data/epilepsy/cell_annotation.csv"
+
+
+path_conosObj <- here("data", paste0(prefixData,"_conos.rds.gz"))
+path_cell_annot <- here("data", paste0(prefixData, "_cell_annot.csv"))
+path_metadata <- here("data",paste0(prefixData, "_sample_metadata.csv" ))
+```
+
+```{r}
+if (!file.exists(path_conosObj)) download.file(url=url_conosObj, destfile = path_conosObj)
+if (!file.exists(path_cell_annotation)) download.file(url=url_cell_annotation, destfile=path_cell_annotation)
+```
+
+## load data
+
+```{r}
+conosObj <- readRDS(path_conosObj)
+```
+
+```{r}
+df_cell_annot <- fread(path_cell_annot, data.table = F)
+rownames(df_cell_annot) <- df_cell_annot$cell
+df_cell_annot$cell <- NULL
+head(df_cell_annot)
+```
+
+```{r}
+dt_meta <- fread(path_metadata)
+head(dt_meta)
+```
+
+# Analysis
+
+## QC
+
+extract lognormalized counts from conos object
+
+```{r}
+lapply(conosObj$samples, '[[', ("counts")) %>% Reduce(f = rbind, x = .) %>% t -> spMat_logCounts
+```
+
+```{r}
+spMat_logCounts[0:4,0:4]
+```
+
+```{r}
+dim(spMat_logCounts)
+```
+
+```{r}
+df_cell_annot %>% nrow
+```
+
+filter cell annotations to retain only those present in lognormalised expression 
+
+```{r}
+df_cell_annot <- df_cell_annot[rownames(df_cell_annot)%in%colnames(spMat_logCounts),]
+```
+
+### Merge cell and sample cell_annotations into per cell metadata
+
+```{r}
+gsub("_[ATCG]{16}-\\d","", rownames(df_cell_annot)) %>% gsub("_one", "", .) -> vec_tmpc_cellPrefixes
+unique(vec_tmpc_cellPrefixes)
+```
+
+```{r}
+dt_meta$Name %>% unique
+```
+
+```{r}
+dt_meta$Name[!dt_meta$Name %in% vec_tmpc_cellPrefixes]
+```
+
+```{r}
+df_cell_annot$Name = vec_tmpc_cellPrefixes
+```
+
+```{r}
+df_cell_annot$Alias <- dt_meta$Alias[match(df_cell_annot$Name, dt_meta$Name)]
+df_cell_annot$Age <- dt_meta$Age[match(df_cell_annot$Name, dt_meta$Name)]
+df_cell_annot$Sex <- dt_meta$Sex[match(df_cell_annot$Name, dt_meta$Name)]
+```
+
+```{r}
+table(df_cell_annot$Sex)
+```
+
+What are the identities at different levels of cell cluster annotations?
+
+```{r}
+table(df_cell_annot$l1)
+```
+
+```{r}
+table(df_cell_annot$l2)
+```
+
+```{r}
+table(df_cell_annot$l3)
+```
+
+```{r}
+table(df_cell_annot$l4)
+```
+
+create seurat object for PCA 
+
+```{r}
+seuratObj <- CreateSeuratObject(counts = spMat_logCounts, 
+                                meta.data = df_cell_annot,
+                                assay = "RNA",
+                                project = prefixData)
+
+```
+
+```{r}
+Idents(seuratObj) <- seuratObj$Name
+```
+
+look at PCA plots
+
+```{r}
+seuratObj %>% 
+  FindVariableFeatures(., nfeatures = 3000)  %>% 
+  ScaleData(., block.size= 10000, min.cells.to.block = 15000) %>%
+  RunPCA(object = ., features = VariableFeatures(.), npcs = npcs, seed.use = randomSeed, verbose=F) -> 
+  seuratObj
+```
+
+```{r, fig.width=8}
+DimPlot(seuratObj, reduction = "pca", dims = c(3,4), group.by="Name")
+```
+
+# check correlations between sample and 20 first PCs
+
+```{r}
+mat_mod <- model.matrix(data = data.frame("sample"=Idents(seuratObj)), object = formula(x=~sample_name))
+```
+
+```{r}
+cor(x = seuratObj@reductions$pca@cell.embeddings[,1:20], y = mat_mod[,-1], method = "pearson") %>% data.table("PC"=rownames(.),.) -> dt_PCAcor
+```
+
+```{r}
+hist(x=as.matrix(dt_PCAcor[,-1]), breaks = 100)
+```
+
+```{r}
+apply(X = dt_PCAcor[,-1], MARGIN = 2, FUN = function(sample_col) hist(x=sample_col))
+```
+
+samples 3,4,5,9, and 10 have quite skewed distributions of correlations with PCs
+
+However, since sample confounds condition we can't go correcting the data. Better to filter later.
+
+## write out files
+
+write to file
+
+logCounts 
+
+```{r}
+file.out.data = here("data", paste0(prefixData, "_logcounts.csv.gz"))
+if (!file.exists(file.out.data)) {
+  lapply(conosObj$samples, function(conosSample) {conosSample[["counts"]] %>% as.matrix %>% t %>% as.data.table}) %>% Reduce(f = cbind, x = .) -> dt_logCounts_tmp
+  dt_logCounts_tmp <- data.table("gene" = rownames(spMat_logCounts), dt_logCounts_tmp) 
+  fwrite(x=dt_logCounts_tmp, file= file.out.data, nThread = 40, compress = "gzip",showProgress = T)
+  rm(dt_logCounts_tmp)
+}
+```
+
+combined cell annotation and sample metadata, filtered to retain only cells present in logCounts
+
+```{r}
+file.out.meta = here("data", paste0(prefixData, "_cell_sample_annot_filter.csv"))
+```
+
+```{r}
+if (!file.exists(file.out.meta)) fwrite(x = df_cell_annot, file = file.out.meta, nThread=20, showProgress = T, row.names = T)
+```

@@ -1,0 +1,188 @@
+---
+title: 'WGCNA modules - make embeddings matrix'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r substr(gsub("-","",as.character(Sys.Date())),3,1000)
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+  nrepBootstrap: !r 1e4
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+
+
+
+## Setup
+
+## Set options
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1)
+```
+
+## Load packages
+
+```{r, include=F}
+library("dplyr")
+library("Matrix")
+library("parallel")
+library("readr")
+library("openxlsx")
+library("data.table")
+library("here")
+
+#TODO are these needed? 
+if (F) {
+  library("ggplot2")
+  library("RColorBrewer") 
+  library("Seurat")
+  library("limma")
+  library("lme4")
+  library("gprofileR")
+}
+#"car","ComplexHeatmap", "liger", "WGCNA", "circlize", "xlsx"))
+```
+
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library","utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_merged"
+colCellCluster = "cell_cluster_merged"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05,
+              "padjMethod"="BH")
+set.seed(params$randomSeed)
+```
+
+## load data
+
+Load modules dataframe
+
+```{r}
+dt_geneMod <- fread(here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+head(dt_geneMod)
+```
+
+get filtered modules as a vector 
+
+```{r}
+dt_geneMod[,.(module_merged),][!is.na(dt_geneMod[["module_merged"]])] [nchar(dt_geneMod[["module_merged"]])>0][[1]] %>% unique -> vec_mods_merged
+```
+
+```{r}
+length(vec_mods_merged)
+```
+
+Load expression data
+
+```{r}
+pathDatExpr <- here("data", paste0(prefixData,"_logcounts.csv.gz"))
+dt_datExpr <- fread(pathDatExpr)
+dt_datExpr[0:5,0:5]
+```
+
+```{r}
+path_dt_cell_annot <- here("data",paste0(prefixData,"_cell_sample_annot_filter.csv"))
+dt_cell_annot <- fread(path_dt_cell_annot, data.table = T)
+colnames(dt_cell_annot)[1] <- "cell_id"
+head(dt_cell_annot)
+```
+
+## Compute cell module embeddings after normalizing gene weights i.e. kIMs
+
+```{r}
+mat_datExpr <- as.matrix(dt_datExpr[,-1])
+rownames(mat_datExpr) <- dt_datExpr[["gene"]]
+```
+
+```{r}
+vec_cellClust <- unique(dt_geneMod[[colCellCluster]])[nchar(unique(dt_geneMod[[colCellCluster]]))>0]
+
+```
+
+```{r}
+fun = function(cellClust) {
+  
+    vec_cellClust_mods = unique(dt_geneMod[[colModule]][dt_geneMod[[colCellCluster]]==cellClust])
+    vec_cellClust_mods <- vec_cellClust_mods[!is.na(vec_cellClust_mods)]
+    
+    list_mat_embed_tmp <- lapply(vec_cellClust_mods, function(module) {
+      
+      vec_geneWeights <- dt_geneMod[[colGeneWeights]][dt_geneMod[[colModule]]==module]
+      names(vec_geneWeights) <- dt_geneMod[[colGeneNames]][dt_geneMod[[colModule]]==module]
+      vec_geneWeights <- vec_geneWeights/sum(vec_geneWeights) # normalise gene Weights
+      
+      mat_datExpr_sub <- mat_datExpr[match(names(vec_geneWeights),rownames(mat_datExpr)), 
+                                     colnames(mat_datExpr) %in% dt_cell_annot$cell_id[dt_cell_annot[["l2"]]==cellClust]]
+      # mat_datExpr_zeros <- mat_datExpr_sp
+      # mat_datExpr_zeros[!rownames(mat_datExpr_sp) %in% names(vec_geneWeights),] <- 0
+      # mat_datExpr_zeros[,!colnames(mat_datExpr_sp) %in% dt_cell_annot$cell_id[dt_cell_annot[["l2"]]==cellClust] ] <- 0
+      # 
+      # vec_geneWeights_zeros <- vector(mode = "numeric",length=nrow(mat_datExpr_zeros))
+      # names(vec_geneWeights_zeros) <- rownames(mat_datExpr_zeros)
+      # vec_geneWeights_zeros[match(names(vec_geneWeights), names(vec_geneWeights_zeros))] <- vec_geneWeights
+      # vec_geneWeights_zeros %>% as.matrix %>% t %>% as.sparse -> mat_geneWeights_zeros 
+      # vec_geneWeights <- vec_geneWeights[match(rownames(mat_datExpr_sub), names(vec_geneWeights))]
+      mat_out <- t(as.matrix(vec_geneWeights)) %*% mat_datExpr_sub
+      # mat_out <-  mat_geneWeights_zeros %*% mat_datExpr_zeros
+
+      return(mat_out)
+    })
+  list_mat_embed_tmp %>% Reduce(x=., f = rbind) %>% t -> mat_embed_tmp
+  colnames(mat_embed_tmp) <- vec_cellClust_mods
+  return(mat_embed_tmp)
+}
+list_mat_embed <- lapply(FUN=fun, X=vec_cellClust)
+names(list_mat_embed) <- vec_cellClust
+#list_mat_embed <- safeParallel(fun=fun, list_iterable=vec_cellClust, Gb_max= 400, n_cores = 8)
+```
+
+```{r}
+sapply(list_mat_embed,dim)
+```
+
+```{r}
+sapply(list_mat_embed,dim) %>% rowSums()
+```
+
+```{r}
+head(list_mat_embed[[1]])
+```
+
+## write out files
+
+```{r}
+invisible(mapply(FUN=function(mat_embed, name) {
+  dt_tmp<-data.table("cell_id"=rownames(mat_embed),mat_embed)
+  fwrite(x = dt_tmp, file = here("tables",paste0(prefixData,"_",prefixRun,"_", name,"_cellModEmbed.csv")))
+},name = names(list_mat_embed), mat_embed = list_mat_embed, SIMPLIFY=F))
+```
+

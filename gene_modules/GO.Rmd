@@ -1,0 +1,165 @@
+---
+title: 'Epilepsy 10x samples v2 - gene ontology analysis (using gProfiler)'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r Sys.time()
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+  padjMethod: "bonferroni"
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+
+Sources
+https://www.bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf
+http://bioconductor.org/packages/release/BiocViews.html#___OrgDb
+GOSemSim: https://bioconductor.org/packages/release/bioc/vignettes/GOSemSim/inst/doc/GOSemSim.html
+
+## Setup
+
+## Set options
+
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1)
+```
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library", "utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## Load packages
+
+```{r}
+
+library("dplyr")
+library("Matrix")
+library("parallel")
+library("readr")
+library("openxlsx")
+library("data.table")
+library("here")
+library("gprofiler2")
+# ipak(c("dplyr", "ggplot2", "Matrix", "parallel", "RColorBrewer", "readr", "pheatmap", "GOSemSim", "AnnotationHub","org.Hs.eg.db", "GSEABase"))#,"ComplexHeatmap", "liger", "WGCNA", "circlize", "xlsx"))
+```
+
+### constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_filter_PMI_surgery"
+colCellCluster = "cell_cluster_filter_PMI_surgery"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05)
+padjMethod ="bonferroni"
+set.seed(params$randomSeed)
+nrepBootstrap = 10000
+```
+
+## load data
+
+Load modules dataframe
+
+```{r}
+dt_geneMod <- fread(here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+head(dt_geneMod)
+```
+
+load linear model epilepsy results
+
+```{r}
+dt_lm_epi_confint <- fread(here("tables", paste0(prefixData, "_dt_lm_epi_confint.csv")))
+```
+
+load epilepsy geneset enrichment results
+
+```{r}
+dt_wilcoxonVIFPvals <- fread(here("tables", paste0(prefixData, "_", prefixRun, "_dt_wilcox_geneset_test.csv")))
+```
+
+## Analysis
+
+First extract a list of gene weights for genes that were actually clustered in the module
+
+```{r}
+vec_mods_m_h_signif <- dt_wilcoxonVIFPvals$module[p.adjust(p=dt_wilcoxonVIFPvals$m_h, method = padjMethod)<=params$pValThreshold]
+```
+
+```{r}
+list_pkMs <- lapply(vec_mods_m_h_signif, function(module) {
+  vecOut<-dt_geneMod[[colGeneWeights]][dt_geneMod[[colModule]]==module]
+  names(vecOut) <- dt_geneMod[[colGeneNames]][dt_geneMod[[colModule]]==module]
+  vecOut
+})
+names(list_pkMs) <- vec_mods_m_h_signif
+head(list_pkMs[[1]])
+```
+
+
+run gprofiler
+
+```{r}
+list_gost <- gprofiler2::gost(query=lapply(list_pkMs, names),
+                                 organism = "hsapiens", 
+                                 ordered_query = T, 
+                                 significant=T,
+                                 exclude_iea = T, 
+                                 correction_method="bonferroni",
+                                 user_threshold=params$pValThreshold,
+                                 custom_bg = load_obj(here("data", paste0(prefixData, "_genesBackground.RDS.gz"))),
+                                 sources=c("GO:BP", "GO:CC","GO:MF"))
+```
+
+```{r}
+head(list_gost$result)
+```
+
+```{r}
+vec_mods_GOsignif <- unique(list_gost$result$query)
+vec_mods_GOsignif
+```
+
+all 9 m_h enriched modules returned GO results
+
+make a reduced gprofiler just for the publication as table
+
+```{r}
+dt_gprofiler_subtable <- setDT(list_gost$result[,c("query","term_name", "p_value")])
+```
+
+## write out outputs
+
+```{r}
+fwrite(list_gost$result, here("tables",paste0(prefixData,"_",prefixRun,"_GOgprofiler2_full.csv")))
+```
+
+```{r}
+openxlsx::write.xlsx(x=list_gost$result, file = here("tables",paste0(prefixData,"_",prefixRun,"_GOgprofiler2_full.xlsx")))
+```
+
+```{r}
+fwrite(dt_gprofiler_subtable, here("tables",paste0(prefixData,"_",prefixRun,"_GOgprofiler2_sub.csv")))
+```
+

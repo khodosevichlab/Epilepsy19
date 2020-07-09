@@ -1,0 +1,273 @@
+---
+title: 'Epilepsy 10x samples v2 - gene set enrichment with variance inflation factor'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r Sys.time()
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+
+Sources
+https://www.bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf
+http://bioconductor.org/packages/release/BiocViews.html#___OrgDb
+GOSemSim: https://bioconductor.org/packages/release/bioc/vignettes/GOSemSim/inst/doc/GOSemSim.html
+
+## Setup
+
+## Set options
+
+```{r}
+options(stringsAsFactors = F, use="pairwise.complete.obs", warn=1)
+```
+
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library", "utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## Load packages
+
+```{r}
+
+library("dplyr")
+library("Matrix")
+library("parallel")
+library("readr")
+library("openxlsx")
+library("data.table")
+library("here")
+library("limma")
+
+# ipak(c("dplyr", "ggplot2", "Matrix", "parallel", "RColorBrewer", "readr", "pheatmap", "GOSemSim", "AnnotationHub","org.Hs.eg.db", "GSEABase"))#,"ComplexHeatmap", "liger", "WGCNA", "circlize", "xlsx"))
+```
+
+### constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_filter_PMI_surgery"
+colCellCluster = "cell_cluster_filter_PMI_surgery"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05)
+padjMethod="bonferroni"
+set.seed(params$randomSeed)
+nrepBootstrap = 10000
+```
+
+## load data
+
+Load modules dataframe
+
+```{r}
+dt_geneMod <- fread(here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+head(dt_geneMod)
+```
+
+Load expression data
+
+```{r}
+pathDatExpr <- here("data", paste0(prefixData,"_logcounts.csv.gz"))
+dt_datExpr <- fread(pathDatExpr)
+dt_datExpr[0:5,0:5]
+```
+
+load cell annotations
+
+```{r}
+path_dt_cell_annot <- here("data",paste0(prefixData,"_cell_sample_annot_filter.csv"))
+dt_cell_annot <- fread(path_dt_cell_annot, data.table = T)
+colnames(dt_cell_annot)[1] <- "cell_id"
+head(dt_cell_annot)
+```
+
+load module embeddings matrices (per cell cluster annotation, l2)
+
+```{r}
+vec_path_dt_embed <- dir(path = here("tables"),pattern = "_cellModEmbed\\.csv$", full.names = T) 
+```
+
+```{r}
+list_dt_embed <- lapply(vec_path_dt_embed, fread)
+```
+
+load linear model epilepsy results
+
+```{r}
+dt_lm_epi_confint <- fread(here("tables", paste0(prefixData, "_dt_lm_epi_confint.csv")))
+```
+
+get significantly associated modules
+
+```{r}
+vec_mods_epi_signif <- dt_lm_epi_confint$module[p.adjust(dt_lm_epi_confint[["p-val"]],method =padjMethod) <= params$pValThreshold]
+```
+
+load kIM geneweights
+
+```{r}
+dt_kMs <- fread(here("tables", paste0(prefixData, "_", prefixRun,"_kMs_full_join.csv.gz")))
+```
+
+Load EP genesets
+
+```{r}
+list_genesets <- load_obj(here("../../data/genesets/epilepsy_EP.RDS"))
+names(list_genesets)
+```
+
+```{r}
+sapply(list_genesets, length)
+```
+we want to use the "m_h" i.e. Mouse Human geneset, which is manually curated
+
+
+
+## Analysis
+
+Sources
+Wikipedia: https://en.wikipedia.org/wiki/Variance_inflation_factor # for linear regression coefficients
+Wu and Smyth, Camera: a competitive gene set test accounting for inter-gene correlation https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/
+
+## Compute Variance Inflation Factor
+
+Calculate Variance Inflation Factor (VIF) resulting from gene-gene covariance in the geneset, estimated in the expression data
+modified from https://rdrr.io/bioc/qusage/src/R/qusage.R
+drawing on https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/
+
+## mathematics
+
+1. _The variance inflation factor procedure is suitable for any experiment that can be represented by 
+genewise linear models_ (Wu and Smyth). 
+2. The linear model: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/
+* write $y_hg = (y_{g1},\dots,y_{gn})^T$ for the vector of expression values for gene $g$, $g = 1,2,\dots G$. We assume that the expected value $E(y_g)=X\alpha_g$
+* Where $X$ is an $n \times p$ design matrix of dummy variables representing the different biological or experimental variables, e.g. treatment or cell type. $\alpha_p$ is an unknown coefficient vector of length $p$, representing the effects of the corresponding labels on the gene.
+3. In Wu and Smuth 2012, the generic type if statistic on which a NULL hypothesis is to be performed is $\Beta_g  = \Sigme_j^p c_j\alpha_{gj}$. Given that $\alpha_gj$ represents the expected log-fold change in gene $g$ of being a sample with condition $j$, the $\alpha$, $X$ and $c$ can be designed such that the contrast $\Beta_g$ represents a log-fold change between two treatment conditions (how??). 
+4. We use the notation $z_g$ to represent any genewise statistic used to test this hypothesis. For example, $\z_g$ may be a t-statistic of the difference of the mean expression of gene $g$ between two groups of samples. 
+5. In this particular case, our genewise statistic is the kME. 
+6. Taking $m$ genewise statistics $z_1, \dots, \z_m$. The variance of the mean $\bar{z}$ is https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/bin/gks461u2.jpg. In our case, $\bar{z}$ is the mean kME of genes in the geneset. The second term in the brackets in the equation represents the increase in the variance of the mean that arises from correlations between the genes.
+7. The derivation of the Variance Inflation Factor (see handwritten notes) shows that the $VIF= 1 + (m-1)\bar{\rho}$.  I.e. we just need to compute the mean correlation between the genes.
+
+```{r}
+calcVIF_JT_1 <- function(dt_datExpr, list_genesets) {
+#' @param datExpr: gene * cell expression matrix
+#' @param geneResults: list of genesets 
+list_vec_vif = lapply(names(list_genesets), function(genesetname) {
+  vec_logicalgenes <- dt_datExpr[["gene"]] %in% list_genesets[[genesetname]]
+  #GNames <- rownames(datExpr)[vec_logicalgenes]
+  #gs.i = which(vec_logicalgenes)
+  if (sum(vec_logicalgenes) < 2) {
+    warning("GeneSet '", genesetname, "' contains one or zero overlapping genes. NAs produced.")
+    return(NA)
+  }
+  mat_cor <- cor(t(dt_datExpr[vec_logicalgenes, -1]), use = "pairwise.complete.obs")
+  mat_cor[is.na(mat_cor)] <- 0
+  
+  (mat_cor - as.matrix(Matrix::Diagonal(x = diag(mat_cor)))) %>% mean -> corMean
+  
+  vif <- 1+(sum(vec_logicalgenes)-1)*corMean
+  return(c("vif"=vif, "mean.cor"=corMean))
+})
+names(list_vec_vif) <- names(list_genesets)
+return(list_vec_vif)
+}
+```
+
+```{r}
+list_vec_vif <- calcVIF_JT_1(dt_datExpr=dt_datExpr,list_genesets = list_genesets)
+list_vec_vif
+```
+
+
+## compute wilcoxon two-sample test
+
+convert kMs to list form
+
+```{r}
+list_kMs <- as.list(dt_kMs)
+names(list_kMs) <- colnames(dt_kMs)
+list_kMs <- list_kMs[names(list_kMs) %in% c("genes", vec_mods_epi_signif)]
+list_kMs <- lapply(list_kMs[-1], function(vec_kMs){
+  names(vec_kMs) <- list_kMs[[1]]
+  vec_kMs
+})
+
+head(list_kMs[[1]])
+```
+
+compute wilcoxon stat p-values
+
+```{r}
+#https://web.mit.edu/~r/current/arch/i386_linux26/lib/R/library/limma/html/rankSumTestwithCorrelation.html
+list_list_vec_wilcoxonVIFPvals <- mapply(function(geneset, vec_vif) {
+  out <- lapply(list_kMs, function(vec_kMs) {
+    vec_kMs <- vec_kMs[!is.na(vec_kMs)]
+    limma::rankSumTestWithCorrelation(index=which(names(vec_kMs) %in% geneset), 
+                                      statistics=vec_kMs, 
+                                      correlation=vec_vif[["mean.cor"]], 
+                                      df=ncol(dt_datExpr)-2) #degrees of freedom which the correlation has been estimated (rather than of a t distribution). Subtract 1 for the genes column, 1 for the mean
+    
+  })
+  names(out) <- names(list_kMs)
+  return(out)
+}, geneset=list_genesets,
+vec_vif = list_vec_vif, 
+SIMPLIFY=F)
+
+list_list_vec_wilcoxonVIFPvals %>% '[['(1) %>% head
+```
+
+```{r}
+mat_wilcoxonVIFPvals <- sapply(list_list_vec_wilcoxonVIFPvals, function(list_vec_wilcoxonVIFPvals) {
+  sapply(list_vec_wilcoxonVIFPvals, function(vec_wilcoxonVIFPvals) {
+    vec_wilcoxonVIFPvals[["greater"]]
+  })
+})
+
+mat_wilcoxonVIFPvals
+```
+
+which modules are significantly enriched for m_h geneset after multiple testing correction?
+
+```{r}
+mat_wilcoxonVIFPvals[,"m_h"][p.adjust(mat_wilcoxonVIFPvals[,"m_h"], method="bonferroni") <= params$pValThreshold]
+```
+
+
+## write to disk
+
+```{r}
+dt_out <- data.table("module"=vec_mods_epi_signif,
+                     "cellCluster"=dt_lm_epi_confint$l2_cell_cluster[dt_lm_epi_confint$module%in%vec_mods_epi_signif],
+                     mat_wilcoxonVIFPvals)
+```
+
+```{r}
+fwrite(dt_out, here("tables", paste0(prefixData, "_", prefixRun, "_dt_wilcox_geneset_test.csv")))
+```
+
+```{r}
+openxlsx::write.xlsx(x=dt_out, file = here("tables", paste0(prefixData, "_", prefixRun, "_dt_wilcox_geneset_test.xlsx")))
+```
+

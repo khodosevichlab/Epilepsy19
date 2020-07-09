@@ -1,0 +1,332 @@
+---
+title: 'WGCNA modules - filter on linear relationship with sample > epi; compute epilepsy linear model betas'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r substr(gsub("-","",as.character(Sys.Date())),3,1000)
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+  nrepBootstrap: !r 1e4
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+  
+Epilepsy temporal lobe 10x samples
+
+## Setup
+
+## Set options
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1)
+
+```
+
+## Load packages
+
+```{r, include=F}
+library("dplyr")
+library("Matrix")
+library("parallel")
+library("readr")
+library("openxlsx")
+library("data.table")
+library("here")
+
+#TODO are these needed? 
+if (F) {
+  library("ggplot2")
+  library("RColorBrewer") 
+  library("Seurat")
+  library("limma")
+  library("lme4")
+  library("gprofileR")
+}
+#"car","ComplexHeatmap", "liger", "WGCNA", "circlize", "xlsx"))
+```
+
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library","utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_filter_PMI_surgery"
+colCellCluster = "cell_cluster_filter_PMI_surgery"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05)
+
+padjMethod = "bonferroni"
+set.seed(params$randomSeed)
+```
+
+## load data
+
+Load modules dataframe
+
+```{r}
+dt_geneMod <- fread(here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+head(dt_geneMod)
+```
+
+get filtered modules as a vector 
+
+```{r}
+dt_geneMod[,.(module_filter_PMI_surgery)][!is.na(dt_geneMod$module_filter_PMI_surgery)] [nchar(dt_geneMod$module_filter_PMI_surgery)>0][[1]] %>% unique -> vec_mods_filter
+```
+
+get cell clusters as vector
+
+```{r}
+dt_geneMod[,.(cell_cluster_filter_PMI_surgery)][!is.na(dt_geneMod$cell_cluster_filter_PMI_surgery)] [nchar(dt_geneMod$cell_cluster_filter_PMI_surgery)>0][[1]] %>% unique -> vec_cellCluster_filter
+```
+
+Load expression data
+
+```{r}
+pathDatExpr <- here("data", paste0(prefixData,"_logcounts.csv.gz"))
+dt_datExpr <- fread(pathDatExpr)
+dt_datExpr[0:5,0:5]
+```
+
+load cell annotations
+
+```{r}
+path_dt_cell_annot <- here("data",paste0(prefixData,"_cell_sample_annot_filter.csv"))
+dt_cell_annot <- fread(path_dt_cell_annot, data.table = T)
+colnames(dt_cell_annot)[1] <- "cell_id"
+head(dt_cell_annot)
+```
+
+load module embeddings matrices (per cell cluster annotation, l2)
+
+```{r}
+list_dt_embed <- lapply(FUN=function(cellClust) {
+  fread(file = here("tables",paste0(prefixData,"_",prefixRun,"_", cellClust,"_cellModEmbed.csv")))
+}, X = vec_cellCluster_filter)
+```
+
+Add "Name" i.e. sample, "l2" celltype and epilepy status columns
+
+```{r}
+list_dt_embed <- lapply(list_dt_embed, function(dt_embed) {
+  vec_idxRow = match(dt_embed$cell_id,dt_cell_annot$cell_id)
+  dt_embed[,Name:= dt_cell_annot$Name[vec_idxRow],]
+  dt_embed[,l2:=dt_cell_annot$l2[vec_idxRow],]
+  dt_embed[,Alias:=dt_cell_annot$Alias[vec_idxRow],] #we need this for computing logfoldchange later
+  dt_embed[,epilepsy:=ifelse(grepl("EP",Alias),1,0),] #we need this for computing logfoldchange later
+  dt_embed
+})
+```
+
+collapse embeddings matrix by celltype / sample combination 
+
+```{r}
+list_dt_embed_avg <- lapply(list_dt_embed, function(dt_embed){
+  vec_colnames_tmp <- colnames(dt_embed)[colnames(dt_embed) %in% vec_mods_filter]
+ dt_embed[,lapply(.SD, mean), by= .(Name,l2), .SDcols=vec_colnames_tmp]})
+```
+
+add Alias, i.e. disease/ctr status to collapsed matrices
+also age and sex
+
+```{r}
+list_dt_embed_avg <- lapply(list_dt_embed_avg, function(dt_embed_avg){
+  vec_Alias = sapply(dt_embed_avg$Name, function(name) unique(dt_cell_annot$Alias[dt_cell_annot$Name==name]))
+  vec_epilepsy <- ifelse(grepl("EP",vec_Alias),1,0)
+  vec_Age = sapply(dt_embed_avg$Name, function(name) unique(dt_cell_annot$Age[dt_cell_annot$Name==name]))
+  vec_Sex = sapply(dt_embed_avg$Name, function(name) unique(dt_cell_annot$Sex[dt_cell_annot$Name==name]))
+  dt_embed_avg[,epilepsy:= vec_epilepsy,]
+  dt_embed_avg[,Alias:= vec_Alias,]
+  dt_embed_avg[,Age:= vec_Age,]
+  dt_embed_avg[,Sex:= vec_Sex,]
+  dt_embed_avg
+})
+```
+
+make model matrix for linear regression: module ~ sample
+
+```{r}
+list_mat_model <- lapply(list_dt_embed_avg,function(dt_embed_avg){
+  mat_model <- model.matrix(object = ~Name, data=as.data.frame(dt_embed_avg))
+  colnames(mat_model) <- gsub("Name","",colnames(mat_model))
+  mat_model <- data.table(mat_model, "Biopsy"=ifelse(dt_embed_avg$Name=="Biopsy",1,0))
+})
+```
+
+```{r}
+list_mat_model_full <- mapply(FUN= function(mat_model, dt_embed_avg) {
+  data.table(mat_model, dt_embed_avg)
+  }, 
+  mat_model =list_mat_model, dt_embed_avg = list_dt_embed_avg, SIMPLIFY=F)
+```
+
+```{r}
+names(list_mat_model_full) <- vec_cellCluster_filter
+```
+
+Compare R squared stats for sample and condition, within the module's subtype only
+
+```{r}
+# Compute R squared with sample as covariate
+list_mat_lmRsquared_l2_Name <- lapply(names(list_mat_model_full), function(cellClust) {
+  mat_model_full <- list_mat_model_full[[cellClust]] 
+  vec_modules <- colnames(mat_model_full)[colnames(mat_model_full) %in% vec_mods_filter]
+      
+  mat_tmp <- sapply(vec_modules, function(module) {
+        vec_tmp <- sapply(unique(mat_model_full[["Name"]]), function(sampleX) {
+          regr <- lm(eval(parse(text=module)) ~ eval(parse(text=sampleX)), data = mat_model_full) 
+          summary.lm(regr)$r.squared
+          })
+      names(vec_tmp) <- unique(mat_model_full[["Name"]])
+      return(vec_tmp)
+    })
+})
+```
+
+```{r}
+mat_lmRsquared_l2_Name <- Reduce(x=list_mat_lmRsquared_l2_Name,f=cbind)
+```
+
+Compute R squared with epilepsy status as covariate
+
+```{r}
+list_vec_lmRsquared_l2_epi <- sapply(names(list_mat_model_full), function(cellClust) {
+  mat_model_full <- list_mat_model_full[[cellClust]] 
+  vec_modules <- colnames(mat_model_full)[colnames(mat_model_full) %in% vec_mods_filter]
+  vec_tmp <- sapply(vec_modules, function(module) {
+    regr<-lm(eval(parse(text=module)) ~ epilepsy, data = mat_model_full) # linear model with only epilepsy epi
+    summary.lm(regr)$r.squared})
+  names(vec_tmp) = vec_modules
+  return(vec_tmp)
+})
+vec_lmRsquared_l2_epi <- unlist(list_vec_lmRsquared_l2_epi , use.names = T)
+names(vec_lmRsquared_l2_epi) <- gsub(".*\\.","",names(vec_lmRsquared_l2_epi))
+```
+
+# Identify modules whose expression is better predicted by epilepsy than by any individual sample within their celltype of origin
+
+```{r}
+vec_logical_epilepsy_vs_Name <- sapply(names(vec_lmRsquared_l2_epi), function(mod) {
+  all(mat_lmRsquared_l2_Name[,mod]<vec_lmRsquared_l2_epi[mod]) # if for any samples the R^2 is larger than for condition, evaluates to F
+},simplify = T)
+```
+
+```{r}
+table(vec_logical_epilepsy_vs_Name)
+```
+
+This yields 38 modules more strongly explained by epilepsy than by any sample
+
+```{r}
+vec_mods_filter_lm <- vec_mods_filter[vec_logical_epilepsy_vs_Name]
+vec_mods_filter_lm
+```
+
+
+### what celltypes are the modules from? 
+
+```{r}
+vec_cellClust_filter_lm <- sapply(vec_mods_filter_lm, function(eachMod) {
+dt_geneMod[[colCellCluster]][dt_geneMod[[colModule]]==eachMod] %>% unique
+})
+names(vec_mods_filter_lm) = vec_cellClust_filter_lm
+vec_mods_filter_lm
+```
+
+
+### Compute lm again for remaining modules, with confidence intervals and t-stat p-values
+
+```{r}
+list_mat_lm_epi_confint <- sapply(names(list_mat_model_full), function(cellClust) {
+  mat_model_tmp <- list_mat_model_full[[cellClust]] 
+  vec_modules <- colnames(mat_model_tmp)[colnames(mat_model_tmp) %in% vec_mods_filter_lm]
+  sapply(vec_modules, function(module) {
+    regr<-lm(eval(parse(text=module)) ~ epilepsy, data = mat_model_tmp) # linear model with only epilepsy condition
+    betaEst <- coef(regr)["epilepsy"]
+    pval <- summary(regr)$coefficients["epilepsy", "Pr(>|t|)"]
+    vec_confint <- stats::confint(object=regr, parm="epilepsy", level=0.95)
+    vec_out <- c(betaEst, vec_confint, pval)
+    names(vec_out) = c("beta", "lower","upper", "p-val")
+    return(vec_out)
+  }) %>% t -> mat_tmp 
+  rownames(mat_tmp) = vec_modules
+  return(mat_tmp)
+})
+
+mat_lm_epi_confint <- Reduce(x=list_mat_lm_epi_confint, f=rbind)
+
+head(mat_lm_epi_confint)
+```
+
+## check significance after multiple testing
+
+```{r}
+vec_logicalBetaPvalSignif <- p.adjust(mat_lm_epi_confint[,"p-val"], method=padjMethod)<params$pValThreshold
+table(vec_logicalBetaPvalSignif)
+```
+
+## Compute log fold change of the means between conditions
+
+collapse full cell-level embeddings by condition
+```{r}
+list_dt_embed_avg_epi <- lapply(list_dt_embed, function(dt_embed){
+  vec_colnames_tmp <- colnames(dt_embed)[colnames(dt_embed) %in% vec_mods_filter_lm]
+  dt_embed[,lapply(.SD, mean), by= .(epilepsy), .SDcols=vec_colnames_tmp]})
+```
+
+```{r}
+
+list_vec_LFC <- lapply(list_dt_embed_avg_epi, function(dt_embed_avg_epi) {
+  (as.numeric(dt_embed_avg_epi[2,2:ncol(dt_embed_avg_epi)]) /  # epilepsy row
+    as.numeric(dt_embed_avg_epi[1,2:ncol(dt_embed_avg_epi)]))  %>% # control row
+    log2 -> vec_LFC
+  names(vec_LFC) <- colnames(dt_embed_avg_epi)[2:ncol(dt_embed_avg_epi)]
+  return(vec_LFC)})
+
+vec_LFC <- unlist(list_vec_LFC, use.names=T)
+names(vec_LFC) <- gsub(".*\\.","",names(vec_LFC))
+vec_LFC
+```
+
+## gather outputs in single data.table
+```{r}
+dt_lm_epi_confint <- data.table("module"=rownames(mat_lm_epi_confint),
+                                "l2_cell_cluster"=vec_cellClust_filter_lm,
+                                mat_lm_epi_confint)
+dt_lm_epi_confint[,LFC:=vec_LFC]
+
+head(dt_lm_epi_confint)
+```
+
+```{r}
+fwrite(dt_lm_epi_confint, file=here("tables", paste0(prefixOut, "_dt_lm_epi_confint.csv")))
+```
+
+```{r}
+openxlsx::write.xlsx(x=dt_lm_epi_confint, file=here("tables", paste0(prefixOut, "_dt_lm_epi_confint.xlsx")))
+```

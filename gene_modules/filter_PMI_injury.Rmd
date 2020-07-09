@@ -1,0 +1,357 @@
+---
+title: 'WGCNA modules - filter on enrichment with post-mortem interval (PMI) or surgery injury DE genes'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r substr(gsub("-","",as.character(Sys.Date())),3,1000)
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+  nrepBootstrap: !r 1e4
+  padjMethod: "bonferroni"
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+  
+Epilepsy temporal lobe 10x samples
+
+## Setup
+
+## Set options
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1)
+```
+
+## Load packages
+
+```{r, include=F}
+library("dplyr")
+library("Matrix")
+library("parallel")
+library("readr")
+library("openxlsx")
+library("data.table") 
+library("here")
+
+#TODO are these needed? 
+if (F) {
+  library("ggplot2")
+  library("RColorBrewer") 
+  library("Seurat")
+  library("limma")
+  library("lme4")
+  library("gprofileR")
+}
+#"car","ComplexHeatmap", "liger", "WGCNA", "circlize", "xlsx"))
+```
+
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library","utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_merged"
+colCellCluster = "cell_cluster_merged"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05)
+padjMethod = "bonferroni"
+set.seed(params$randomSeed)
+```
+
+## load data
+
+Load modules dataframe
+
+```{r}
+path_dt_geneMod = here("tables",paste0(prefixData, "_", prefixRun, "_geneMod_merged.csv.gz"))
+dt_geneMod <- fread(path_dt_geneMod)
+head(dt_geneMod)
+```
+
+Load embeddings data.table
+
+```{r}
+path_dt_embed = here("tables", paste0(prefixData, "_", prefixRun, "_kIM_cellModEmbed.csv.gz"))
+dt_embed <- fread(path_dt_embed)
+dt_embed[0:5,0:5]
+```
+
+```{r}
+pathMetadata <- here("data",paste0(prefixData,"_cell_sample_annot_filter.csv"))
+dt_metadata <- fread(pathMetadata)
+dt_metadata
+```
+
+## Filter modules
+
+### Filter out redundant modules(pruned using gene_module_merge2.R)
+
+```{r}
+vec_modsToKeep <- dt_geneMod$module_merged %>% unique 
+vec_modsToKeep <- vec_modsToKeep[!is.na(vec_modsToKeep) & nchar(vec_modsToKeep)>0]
+```
+
+filter embeddings and convert to matrix (removing cell_cluster and data columns)
+
+```{r}
+vec_modsToKeep
+```
+
+```{r}
+length(vec_modsToKeep)
+```
+
+```{r}
+colnames(dt_embed) <- gsub(".*__","", colnames(dt_embed))
+dt_embed %>% dplyr::select(.data = ., c("cell_id", vec_modsToKeep)) -> dt_embed_filter
+dim(dt_embed_filter)
+```
+
+```{r}
+dt_embed_filter[0:3,0:5]
+```
+
+## Compute enrichment with surgery and post-mortem DE genes using an empirical dot product test
+
+Load surgery and post-morten DE genes
+
+```{r}
+df_surgeryGenes <- read.xlsx(xlsxFile = here("data", "surgery_postmorten_DEgenes.xlsx"), sheet = "Neurosurgical\ DE\ genes", startRow = 1, colNames = T, rowNames = F)
+head(df_surgeryGenes)
+```
+
+```{r}
+df_PMIGenes <- read.xlsx(xlsxFile = here("data","surgery_postmorten_DEgenes.xlsx"), sheet = "Post-mortem\ DE\ genes", startRow = 1, colNames = T, rowNames = F)
+head(df_PMIGenes)
+```
+
+Make vectors of -log10 p-values for surgery and PMI genes
+
+We use p values because we don't care about the direction of the LFC
+
+```{r}
+vec_surgeryMinLog10Pval <- df_surgeryGenes$P.Value %>% log10(.) %>% '-'(.)
+vec_surgeryLFCweighted <- vec_surgeryMinLog10Pval * df_surgeryGenes$log2FC
+names(vec_surgeryLFCweighted) <- df_surgeryGenes$gene 
+head(vec_surgeryLFCweighted)
+tail(vec_surgeryLFCweighted)
+```
+
+```{r}
+vec_PMIMinLog10Pval <- df_PMIGenes$P.Value %>% log10(.) %>% '-'(.)
+vec_PMI_LFCweighted <- vec_PMIMinLog10Pval * df_PMIGenes$log2FC
+names(vec_PMI_LFCweighted) <- df_PMIGenes$gene 
+head(vec_PMI_LFCweighted)
+tail(vec_PMI_LFCweighted)
+```
+
+Use all genes in experiment as background 
+
+```{r}
+path_vecGeneBackground <- here("data", paste0(prefixData, "_genesBackground.RDS.gz"))
+
+if (!file.exists(path_vecGeneBackground)) {
+  pathDatExpr <- here("data", "ep_10x_v2_logcounts.csv.gz")
+  dt_datExpr <- fread(pathDatExpr)
+  vec_genesBackground <- dt_datExpr$gene
+  saveRDS(vec_genesBackground, file = path_vecGeneBackground, compress="gzip")
+} else {
+  vec_genesBackground <- readRDS(path_vecGeneBackground)
+}
+```
+
+make random vectors of -log10*LFC values for surgery and PMI DE genes, respectively
+
+```{r}
+list_vec_surgeryLFCweighted_rand <- lapply(1:params$nrepBootstrap, function(i) {
+  vec_surgeryLFCweighted_rand = vec_surgeryLFCweighted
+  names(vec_surgeryLFCweighted_rand) <- sample(x = vec_genesBackground, size=length(vec_surgeryLFCweighted_rand),replace = F)
+  vec_surgeryLFCweighted_rand
+})
+```
+
+```{r}
+list_vec_PMI_LFCweighted_rand <- lapply(1:params$nrepBootstrap, function(i) {
+  vec_PMI_LFCweighted_rand <- vec_PMI_LFCweighted
+  names(vec_PMI_LFCweighted_rand) <- sample(x = vec_genesBackground, size=length(vec_PMI_LFCweighted_rand),replace = F)
+  vec_PMI_LFCweighted_rand
+})
+```
+
+```{r}
+vec_mods = unique(dt_geneMod[[colModule]])
+vec_mods <- vec_mods[!is.na(vec_mods)]
+length(vec_mods)
+```
+
+get module gene weights, i.e. kMs
+
+```{r}
+list_vec_kMs <- lapply(vec_mods, function(module) {
+  vec_kMs <- dt_geneMod[[colGeneWeights]][dt_geneMod[[colModule]]==module]
+  names(vec_kMs) <- dt_geneMod[[colGeneNames]][dt_geneMod[[colModule]]==module] 
+  vec_kMs <- vec_kMs[!is.na(vec_kMs)]
+  vec_kMs
+})
+names(list_vec_kMs) <- vec_mods
+lapply(list_vec_kMs[1:3], head)
+```
+
+define the intersect dot product function
+
+```{r}
+fun_dotProd = function(vec_kMs, vec_LFCweighted) {
+  vec_genesShared <- intersect(names(vec_kMs), names(vec_LFCweighted))
+  if (length(vec_genesShared)==0) return(0)
+  vec_kMs[match(vec_genesShared,names(vec_kMs))] %*% vec_LFCweighted[match(vec_genesShared,names(vec_LFCweighted))]
+}
+```
+
+compute intersect dot products for surgery and PMI -log10 pval vectors
+
+surgery injury
+
+```{r}
+vec_dotprodSurgery <- sapply(list_vec_kMs, function(vec_kMs) fun_dotProd(vec_kMs = vec_kMs, vec_LFCweighted=vec_surgeryLFCweighted))
+head(vec_dotprodSurgery)
+```
+
+```{r}
+vec_dotprodPMI <- sapply(list_vec_kMs, function(vec_kMs) fun_dotProd(vec_kMs = vec_kMs, vec_LFCweighted=vec_PMI_LFCweighted))
+head(vec_dotprodPMI)
+```
+
+## Compute empirical p-values
+
+Make a null distribution for each module - geneset pair
+
+surgery / injury genes
+
+```{r}
+mat_dotprodSurgery_NULL <- safeParallel(fun=function(vec_LFCweighted_rand) {
+                                              sapply(list_vec_kMs, function(vec_kMs) {
+                                                fun_dotProd(vec_kMs=vec_kMs, vec_LFCweighted=vec_LFCweighted_rand)
+                                              })
+                                            },
+                                        list_iterable = list("X"=list_vec_surgeryLFCweighted_rand),
+                                        outfile = here("log", paste0(prefixOut, "_log_pardotprodtest_surgery_NULL.txt")), 
+                                        simplify=T)
+```
+
+PMI
+
+```{r}
+mat_dotprodPMI_NULL <- safeParallel(fun=function(vec_LFCweighted_rand) {
+                                        sapply(list_vec_kMs, function(vec_kMs) {
+                                          fun_dotProd(vec_kMs=vec_kMs, vec_LFCweighted=vec_LFCweighted_rand)
+                                        })
+                                      }, 
+                                    list_iterable = list("X"=list_vec_PMI_LFCweighted_rand),
+                                    outfile = here("log", paste0(prefixOut, "_log_par_dotprodtest_PMI_NULL.txt")), 
+                                    simplify=T)
+
+```
+
+```{r}
+mat_dotprodPMI_NULL[0:5,0:5]
+```
+
+Plot NULL distributions
+
+```{r}
+hist(mat_dotprodSurgery_NULL[1,], breaks=100)
+```
+
+```{r}
+hist(mat_dotprodPMI_NULL[1,], breaks=100)
+```
+
+compute empirical p-values
+
+"greater"
+
+surgery
+
+```{r}
+vec_dotprodSurgeryPvalEmp <- sapply(vec_mods, function(module) {
+  (sum(mat_dotprodSurgery_NULL[module,]>=vec_dotprodSurgery[module])+1)/(length(mat_dotprodSurgery_NULL[module,])+1)
+})
+head(vec_dotprodSurgeryPvalEmp)
+```
+
+PMI 
+
+```{r}
+vec_dotprodPMIPvalEmp <- sapply(vec_mods, function(module) {
+(sum(mat_dotprodPMI_NULL[module,]>=vec_dotprodPMI[module])+1)/(length(mat_dotprodPMI_NULL[module,])+1)
+})
+head(vec_dotprodPMIPvalEmp)
+```
+
+Which modules are significantly enriched for surgery or post-morten interval DE genes?
+(correct for multiple testing)
+
+surgery 
+
+```{r}
+vec_modsSurgery <-names(vec_dotprodSurgeryPvalEmp)[p.adjust(p = vec_dotprodSurgeryPvalEmp, method=padjMethod) <= params$pValThreshold]
+vec_modsSurgery
+```
+
+PMI 
+
+```{r}
+vec_modsPMI <- names(vec_dotprodPMIPvalEmp)[p.adjust(p=vec_dotprodPMIPvalEmp,method = padjMethod) <= params$pValThreshold]
+vec_modsPMI
+```
+
+Remove PMI or surgery enriched modules
+
+```{r}
+vec_modsToKeep <- vec_modsToKeep[!vec_modsToKeep %in% c(vec_modsPMI,vec_modsSurgery)]
+```
+
+```{r}
+length(vec_modsToKeep)
+```
+
+## write out results
+
+```{r}
+dt_geneMod$module_filter_PMI_surgery <- dt_geneMod$module_merged
+dt_geneMod$module_filter_PMI_surgery[!dt_geneMod$module_merged %in% vec_modsToKeep] <- NA
+```
+
+```{r}
+dt_geneMod$cell_cluster_filter_PMI_surgery <- dt_geneMod$cell_cluster_merged
+dt_geneMod$cell_cluster_filter_PMI_surgery[!dt_geneMod$module_merged %in% vec_modsToKeep] <- NA
+```
+
+```{r}
+fwrite(dt_geneMod, file=here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+```

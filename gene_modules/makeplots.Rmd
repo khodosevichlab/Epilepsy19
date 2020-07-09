@@ -1,0 +1,207 @@
+---
+title: 'Epilepsy - plotting'
+author: "Jon Thompson, Pers lab"
+date: "`r Sys.time()`" 
+params: 
+  date: !r substr(gsub("-","",as.character(Sys.Date())),3,1000)
+  randomSeed: !r 12345
+  pValThreshold: !r 0.05
+  padjMethod: "bonferroni"
+output:
+  html_notebook: 
+  df_print: paged
+number_sections: yes
+toc: yes
+toc_depth: 3
+toc_float: yes
+html_document:
+  df_print: paged
+---
+
+   
+# Setup
+
+## Set options
+
+```{r}
+options(stringsAsFactors = F, 
+        use="pairwise.complete.obs", 
+        warn=1)
+```
+
+## Source functions
+
+## Load packages
+
+
+```{r, include=F}
+library("magrittr")
+library("Matrix")
+library("openxlsx")
+library("data.table") 
+library("here")
+library("ggplot2")
+library("RColorBrewer") 
+library("pheatmap")
+#library("scales")
+```
+
+## source functions
+
+```{r}
+source(file=here("perslab-sc-library","utility_functions.R"))
+source(file=here("perslab-sc-library","functions_sc.R"))
+```
+
+## constants 
+
+```{r}
+prefixData <- "ep_10x_v2"
+prefixRun <-  "1"
+prefixOut <- "ep_10x_v2"
+
+colGeneNames = "genes"
+colGeneWeights ="pkMs"
+colModule = "module_filter_PMI_surgery"
+colCellCluster = "cell_cluster_filter_PMI_surgery"
+```
+
+```{r}
+params = list("randomSeed"=12345, 
+              "date"=substr(gsub("-","",as.character(Sys.Date())),3,1000), 
+              "nrepBootstrap"=1e4, 
+              "pValThreshold" =0.05)
+padjMethod="bonferroni"
+set.seed(params$randomSeed)
+```
+
+## load data
+
+```{r}
+dt_geneMod <- fread(here("tables","ep_10x_v2_1_geneMod_merged_filterPMIsurg.csv.gz"))
+head(dt_geneMod)
+```
+
+load linear model epilepsy results
+
+```{r}
+dt_lm_epi_confint <- fread(here("tables", paste0(prefixData, "_dt_lm_epi_confint.csv")))
+head(dt_lm_epi_confint)
+```
+
+load epilepsy geneset enrichment results
+
+```{r}
+dt_wilcoxonVIFPvals <- fread(here("tables", paste0(prefixData, "_", prefixRun, "_dt_wilcox_geneset_test.csv")))
+head(dt_wilcoxonVIFPvals)
+```
+
+## Plotting
+
+## 1. Gene set enrichment plot
+
+```{r}
+set.seed(2)
+```
+
+```{r}
+vec_celltype <- dt_wilcoxonVIFPvals$cellCluster
+vec_color = sample(x=unique(gsub("\\d","",colors())), size=length(unique(vec_celltype)), replace=F)
+vec_colors_celltype = rep(x = vec_color,times = c(dt_wilcoxonVIFPvals[,.N,by="cellCluster"][[2]]))
+
+orderToUse1 = 1:length(vec_celltype)
+vec_celltype <- factor(x = vec_celltype)
+vec_celltype <- reorder(x=vec_celltype, X = orderToUse1, order=T)
+
+vec_module <- dt_wilcoxonVIFPvals$module 
+orderToUse2 = 1:length(vec_module)
+vec_module <- factor(x = vec_module)
+vec_module <- reorder(x=vec_module, X = orderToUse2, order=T)
+
+names(vec_module) <- vec_module # for coloring
+
+dt_wilcoxonVIFPvals[["m_h"]] %>% log10 %>% '-'(.) -> vec_genesetMinlog10pval
+names(vec_genesetMinlog10pval) <- dt_wilcoxonVIFPvals$module
+  
+# put everything in data.frame for plotting
+df_data =data.frame("celltype"=vec_celltype, 
+                    "module"=vec_module, 
+                    "color"=vec_colors_celltype, 
+                    "minLog10pval" = vec_genesetMinlog10pval)
+
+# Bonferroni adjusted p value cutoff
+params$pValThreshold %>% '/'(length(vec_genesetMinlog10pval)) %>% log10 %>% '-'(.) -> cutoff
+```
+
+plot 
+
+```{r}
+
+p <- 
+  ggplot(data=df_data, aes(x=module, y=minLog10pval, fill=celltype)) +
+  geom_bar(stat="identity", position=position_identity(), group=df_data$celltype) + 
+  scale_fill_manual(values=vec_color) + # this is a kluge
+  #scale_fill_manual(values=unique(df_data$celltype)) + # this is a kluge
+  geom_hline(yintercept=cutoff, linetype="dashed", color = "red") +
+  scale_y_continuous("-log10(p-value)", expand = c(0, 0)) +
+  scale_x_discrete("module") +  
+  # geom_text(aes(label=module),
+  #         #angle=90,
+  #         #vjust=-1,
+  #         hjust = 2,
+  #         color="black",
+  #         angle=90,
+  #        position = position_dodge(), 
+  #        size=2.5) +
+  theme(axis.text.x = element_text(angle=90,hjust=1),#element_blank(),
+      axis.line.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank())
+
+saveMeta(savefnc=ggsave,plot = p,
+         filename = here("plots", paste0(prefixOut, "_genesetEnrichmentBarplot", params$date,".pdf")), height=10, width =15)
+
+```
+
+Plot betas as heatmap column annotation under enrichment barplot
+
+```{r}
+vec_beta_modCelltype <- dt_lm_epi_confint[["beta"]][match(df_data$module, dt_lm_epi_confint$module)]
+
+names(vec_beta_modCelltype) <- as.character(df_data$module)
+```
+
+```{r}
+pheatmap::pheatmap(mat = matrix(data = vec_beta_modCelltype, nrow=1),
+         color =  rev(colorRampPalette(brewer.pal(n=9, name="RdYlBu"))(100))[1:60],
+         kmeans_k = NA,
+         cluster_rows = F,
+         cluster_cols = F,
+         legend_breaks=c(-0.2,0,0.15),
+         main=NA,#"Log2 fold change epilepsy versus control",
+         filename= here("plots", paste0(prefixOut, "_beta_heatmap_", params$date,".pdf")), cellheight = 40, height=1.2, width =15)
+
+```
+
+## hubgenes table 
+
+use all 34 modules associated with epilepsy status - not just those also enriched for m_h
+
+```{r}
+# vec_mods_m_h_signif <- dt_wilcoxonVIFPvals$module[p.adjust(dt_wilcoxonVIFPvals$m_h, method = params$padjMethod) <= params$pValThreshold]
+
+```
+
+```{r}
+mat_hubgenes <- sapply(dt_wilcoxonVIFPvals$module, function(module) {
+  dt_geneMod[[colGeneNames]][dt_geneMod[[colModule]]==module][1:10]
+})
+mat_hubgenes
+```
+
+
+```{r}
+saveMeta(savefnc = write.xlsx, x=mat_hubgenes, file=here("tables", paste0(prefixOut, "_", params$date,"_mat_hubgenes.xlsx")))
+```
+
