@@ -1,0 +1,25 @@
+Package: Epilepsy19
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Viktor", family = "Petukhov", role = c("aut", "cre"), email = "viktor.s.petuhov@ya.ru")
+Description: What the package does (one paragraph).
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    conos,
+    ggbeeswarm,
+    ggrastr,
+    data.table,
+    magrittr,
+    Matrix,
+    org.Hs.eg.db,
+    pagoda2,
+    pbapply,
+    parallel
+RoxygenNote: 7.1.0
+Depends: 
+    dataorganizer (>= 0.1.0)
+Remotes: 
+    khodosevichlab/dataorganizer
