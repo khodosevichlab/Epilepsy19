@@ -15,6 +15,11 @@ The raw notebooks:
   - [Comparison to Smart-Seq2 and Allen Brain Institute data](./analysis/fig_smart_seq.Rmd)
   - [Gene module analysis](./gene_modules/)
 
+Relevant meta-data:
+- [CellAnnotatoR-compatible list of marker genes](./metadata/neuron_markers.txt)
+- [Cell type annotation](./metadata/annotation.csv)
+- [Sample information](./metadata/sample_info.csv)
+
 <!--
 ## Prepare data
 
