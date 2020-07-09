@@ -1,0 +1,3047 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Figures with gene pathways</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Epilepsy19</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Figures with gene pathways</h1>
+<h4 class="date">08 July, 2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-07-08
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Epilepsy19/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.1). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200706code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200706)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200706code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200706)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomkhodosevichlabEpilepsy19tree856ddcff5cd9f1487723863d439ab3088ac998bftargetblank856ddcfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/khodosevichlab/Epilepsy19/tree/856ddcff5cd9f1487723863d439ab3088ac998bf" target="_blank">856ddcf</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomkhodosevichlabEpilepsy19tree856ddcff5cd9f1487723863d439ab3088ac998bftargetblank856ddcfa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/khodosevichlab/Epilepsy19/tree/856ddcff5cd9f1487723863d439ab3088ac998bf" target="_blank">856ddcf</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/fig_go.nb.html
+    Ignored:    analysis/fig_neun.nb.html
+    Ignored:    analysis/fig_overview.nb.html
+    Ignored:    analysis/fig_smart_seq.nb.html
+    Ignored:    analysis/fig_summary.nb.html
+    Ignored:    analysis/fig_type_distance.nb.html
+    Ignored:    analysis/gene_testing.nb.html
+    Ignored:    analysis/prep_alignment.nb.html
+    Ignored:    cache/con_allen.rds
+    Ignored:    cache/con_filt_cells.rds
+    Ignored:    cache/con_filt_samples.rds
+    Ignored:    cache/con_ss.rds
+    Ignored:    cache/count_matrices.rds
+    Ignored:    cache/p2s/
+    Ignored:    output/
+
+Untracked files:
+    Untracked:  DESCRIPTION
+    Untracked:  NAMESPACE
+    Untracked:  R/
+    Untracked:  analysis/prep_alignment.Rmd
+    Untracked:  analysis/prep_filtration.Rmd
+    Untracked:  analysis/site_libs/
+    Untracked:  code/
+    Untracked:  gene_modules/
+    Untracked:  man/
+    Untracked:  metadata/
+
+Unstaged changes:
+    Modified:   Epilepsy19.Rproj
+    Modified:   README.md
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/fig_go.Rmd</code>) and HTML (<code>docs/fig_go.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/khodosevichlab/Epilepsy19/blob/5c8e6348b56258623a0a7ff95eec8bab2bd801b7/analysis/fig_go.Rmd" target="_blank">5c8e634</a>
+</td>
+<td>
+viktor_petukhov
+</td>
+<td>
+2020-07-08
+</td>
+<td>
+Fixed dates in fig_ notebooks
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/khodosevichlab/Epilepsy19/blob/f39566ca0b5962f6385d1a626bc6858929056b8d/analysis/fig_go.Rmd" target="_blank">f39566c</a>
+</td>
+<td>
+viktor_petukhov
+</td>
+<td>
+2020-07-07
+</td>
+<td>
+Fixed fig_go
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/khodosevichlab/Epilepsy19/blob/6452bfa9ac9baeee5cc6bbbca3eb05fbfa12c257/analysis/fig_go.Rmd" target="_blank">6452bfa</a>
+</td>
+<td>
+viktor_petukhov
+</td>
+<td>
+2020-07-06
+</td>
+<td>
+GO notebook
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(pagoda2)
+library(conos)
+library(parallel)
+library(magrittr)
+library(ggplot2)
+library(pbapply)
+library(tibble)
+library(dplyr)
+library(ggrastr)
+library(cowplot)
+library(ggbeeswarm)
+library(readr)
+library(pheatmap)
+library(reshape2)
+
+library(clusterProfiler)
+library(DOSE)
+library(org.Hs.eg.db)
+library(enrichplot)
+
+devtools::load_all()
+theme_set(theme_bw())
+
+outPath &lt;- function(...) OutputPath(&quot;fig_go&quot;, ...)
+div_fill_scale &lt;- scale_fill_brewer(palette=&quot;Set2&quot;)
+div_color_scale &lt;- scale_color_brewer(palette=&quot;Set2&quot;)
+
+kNtColors &lt;- c(Inhibitory=&quot;#1b9e77&quot;, Excitatory=&quot;#d95f02&quot;)</code></pre>
+<div id="prepare-data" class="section level2">
+<h2>Prepare data</h2>
+<pre class="r"><code>con &lt;- read_rds(CachePath(&quot;con_filt_samples.rds&quot;))
+
+cm_merged &lt;- con$getJointCountMatrix() %&gt;% Matrix::t()
+cm_merged_raw &lt;- con$getJointCountMatrix(raw=T) %&gt;% Matrix::t()
+
+annotation_by_level &lt;- MetadataPath(&quot;annotation.csv&quot;) %&gt;% read_csv() %&gt;%
+  filter(cell %in% colnames(cm_merged))
+annotation &lt;- annotation_by_level %$% setNames(l4, cell) %&gt;% as.factor()
+sample_per_cell &lt;- con$getDatasetPerCell()
+
+neuron_type_per_type &lt;- ifelse(grepl(&quot;L[2-6].+&quot;, unique(annotation)), &quot;Excitatory&quot;, &quot;Inhibitory&quot;) %&gt;% 
+  setNames(unique(annotation))
+
+condition_per_sample &lt;- ifelse(grepl(&quot;E&quot;, levels(sample_per_cell)), &quot;epilepsy&quot;, &quot;control&quot;) %&gt;% 
+  setNames(levels(sample_per_cell))
+
+type_order &lt;- names(neuron_type_per_type)[order(neuron_type_per_type, names(neuron_type_per_type))]</code></pre>
+<pre class="r"><code>con$plotGraph(groups=annotation, size=0.1, shuffle.colors=T, font.size=c(2,4))</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-3-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>annot_filt &lt;- as.factor(annotation[names(con$getDatasetPerCell())])
+cm_bool &lt;- cm_merged_raw
+cm_bool@x &lt;- (cm_merged_raw@x &gt; 1) * 1
+cm_collapsed_bool &lt;- conos:::collapseCellsByType(Matrix::t(cm_bool), annot_filt, min.cell.count=0)
+
+expressed_genes_per_type &lt;- (cm_collapsed_bool &gt; as.vector(table(annot_filt)[rownames(cm_collapsed_bool)] * 0.05)) %&gt;% 
+  apply(1, function(row) names(which(row)))
+
+gene_id_per_name &lt;- bitr(rownames(cm_merged_raw), &#39;SYMBOL&#39;, &#39;ENTREZID&#39;, org.Hs.eg.db) %$%
+  setNames(ENTREZID, SYMBOL)</code></pre>
+<pre><code>&#39;select()&#39; returned 1:many mapping between keys and columns</code></pre>
+<pre><code>Warning in bitr(rownames(cm_merged_raw), &quot;SYMBOL&quot;, &quot;ENTREZID&quot;, org.Hs.eg.db):
+35.52% of input gene IDs are fail to map...</code></pre>
+<pre class="r"><code>measured_universe &lt;- gene_id_per_name[rownames(cm_bool)] %&gt;% .[!is.na(.)]</code></pre>
+<pre class="r"><code>sample_groups &lt;- split(names(condition_per_sample), condition_per_sample)
+de &lt;- getPerCellTypeDE(con, groups=annotation, sample.groups=sample_groups,
+                       ref.level=&quot;control&quot;, n.cores=40, min.cell.count=3) %&gt;% lapply(`[[`, &quot;res&quot;)
+
+de_filtered &lt;- lapply(de, function(df) df[!is.na(df$stat) &amp; (abs(df$stat) &gt; 3),])
+de_genes_filt &lt;- mapply(intersect, lapply(de_filtered, rownames), expressed_genes_per_type[names(de_filtered)])
+
+de_gene_ids &lt;- lapply(de_genes_filt, function(gs) gene_id_per_name[gs] %&gt;% .[!is.na(.)])</code></pre>
+<pre class="r"><code>de_all &lt;- names(de_filtered) %&gt;% lapply(function(n) 
+  cbind(Type=n, de_filtered[[n]], lowExpession=!(rownames(de_filtered[[n]]) %in% expressed_genes_per_type[[n]]))) %&gt;% 
+  lapply(as_tibble, rownames=&quot;Gene&quot;) %&gt;% bind_rows()
+
+write_csv(de_all, outPath(&quot;de_all.csv&quot;))</code></pre>
+</div>
+<div id="volcano-plots" class="section level2">
+<h2>Volcano plots</h2>
+<pre class="r"><code>gg_volcanos &lt;- de %&gt;% split(neuron_type_per_type[names(.)]) %&gt;% lapply(function(des) {
+  lapply(des, function(de) de %&gt;% EnhancedVolcano::EnhancedVolcano(
+    lab=rownames(.), x = &#39;log2FoldChange&#39;, y = &#39;padj&#39;, legendPosition=&quot;none&quot;,
+    pCutoff=5e-2, FCcutoff=1.5, labSize=2, title=NULL, subtitle=NULL, caption=NULL, 
+    axisLabSize=10, pointSize=0.5, xlab=NULL, ylab=NULL, xlim=c(-5, 6.5),
+    raster=T, raster.width=8/3, raster.height=ifelse(length(des) &gt; 15, 10/8, 10/5), raster.dpi=150
+    ) +
+           scale_y_continuous(limits=c(0, -log10(max(de$padj))), expand=c(0, 0.1)) +
+           theme(plot.margin=margin(), axis.ticks.length=unit(0.1, &quot;pt&quot;))
+  ) %&gt;% cowplot::plot_grid(plotlist=., ncol=3, labels=paste0(names(des), &quot;\n&quot;, sapply(des, nrow), &quot; genes&quot;), 
+                           label_x=0.14, label_y=0.99, label_size=6, align=&quot;hv&quot;, axis=&quot;lrtb&quot;, hjust=0) %&gt;% 
+    `+`(theme(plot.margin=margin(b=12, l=12))) %&gt;% 
+    `+`(draw_label(&quot;Log2(Fold Change)&quot;, size=12, y=-0.01, angle = 0)) %&gt;% 
+    `+`(draw_label(&quot;-Log10(P-adjusted)&quot;, size=12, x=-0.01, angle = 90))
+})
+
+gg_volcanos</code></pre>
+<pre><code>$Excitatory</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre><code>
+$Inhibitory</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-7-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;volcanos_ex.pdf&quot;), gg_volcanos$Excitatory, width=8, height=10)
+ggsave(outPath(&quot;volcanos_inh.pdf&quot;), gg_volcanos$Inhibitory, width=8, height=10)</code></pre>
+</div>
+<div id="gwas-and-ep-genes" class="section level2">
+<h2>GWAS and EP genes</h2>
+<pre class="r"><code>expressed_genes &lt;- unlist(expressed_genes_per_type) %&gt;% unique()
+gwas_genes &lt;- read_csv(MetadataPath(&quot;gwas_genes.csv&quot;))$x %&gt;% 
+  intersect(expressed_genes)
+
+ep_genes &lt;- read_csv(MetadataPath(&quot;ep_genes.csv&quot;))$x %&gt;% 
+  intersect(rownames(cm_merged))</code></pre>
+<div id="gwas-genes" class="section level3">
+<h3>GWAS genes</h3>
+<pre class="r"><code>gwas_test_res &lt;- fTestPerDe(de_genes_filt, gwas_genes, expressed_genes) %&gt;% 
+  mutate(Type=factor(Type, levels=type_order))
+
+p_gwas &lt;- plotFTestResults(gwas_test_res, neuron_type_per_type, y.max=40, y.lab=&quot;Enrichment statistic\nfor GWAS genes&quot;) +
+  div_fill_scale
+
+ggsave(outPath(&quot;gwas_enrichment.pdf&quot;), p_gwas, width=7, height=4)
+
+p_gwas</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>gwas_rank_df &lt;- gwas_test_res %$% 
+  tibble(Type=as.character(Type), Stat=stat, Affected=(stat &gt; 1), HighlyAffected=(stat_min &gt; 0.75)) %&gt;% 
+  mutate(Rank=setNames(-Stat, Type) %&gt;% split(neuron_type_per_type[Type]) %&gt;% lapply(rank) %&gt;% Reduce(c, .) %&gt;% .[Type], 
+         StatType=&quot;GWAS&quot;)</code></pre>
+<pre class="r"><code>gwas_hits_lst &lt;- lapply(de_filtered, function(x) sort(intersect(rownames(x), gwas_genes)))
+gwas_hits &lt;- tibble(Type=factor(names(gwas_hits_lst), levels=type_order),
+                    NHits=sapply(gwas_hits_lst, length),
+                    Hits=sapply(gwas_hits_lst, paste, collapse=&quot;,&quot;)) %&gt;% 
+  arrange(Type)
+write_csv(gwas_hits, outPath(&quot;gwas_hits.csv&quot;))
+
+gwas_hits</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Type</th>
+<th align="right">NHits</th>
+<th align="left">Hits</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">L2_3_Cux2_Frem3</td>
+<td align="right">5</td>
+<td align="left">ATXN1,GABRA2,SCN1A,STAT4,TTC21B</td>
+</tr>
+<tr class="even">
+<td align="left">L2_Cux2_Lamp5</td>
+<td align="right">8</td>
+<td align="left">ATXN1,BCL11A,FANCL,GABRA2,KCNN2,SCN1A,STAT4,ZEB2</td>
+</tr>
+<tr class="odd">
+<td align="left">L3_Cux2_Prss12</td>
+<td align="right">4</td>
+<td align="left">GRIK1,KCNN2,SCN1A,TTC21B</td>
+</tr>
+<tr class="even">
+<td align="left">L4_Rorb_Arhgap15</td>
+<td align="right">1</td>
+<td align="left">SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L4_Rorb_Met</td>
+<td align="right">1</td>
+<td align="left">KCNN2</td>
+</tr>
+<tr class="even">
+<td align="left">L4_Rorb_Mme</td>
+<td align="right">1</td>
+<td align="left">TTC21B</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Lrrk1_Pcp4</td>
+<td align="right">3</td>
+<td align="left">SCN1A,STAT4,TTC21B</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Fezf2_Lrrk1_Sema3e</td>
+<td align="right">2</td>
+<td align="left">KCNAB1,SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Tle4_Abo</td>
+<td align="right">4</td>
+<td align="left">KCNAB1,KCNN2,SCN1A,STAT4</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Fezf2_Tle4_Htr2c</td>
+<td align="right">3</td>
+<td align="left">PCDH7,SCN1A,STAT4</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Tle4_Scube1</td>
+<td align="right">2</td>
+<td align="left">KCNAB1,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Themis_Ntng2</td>
+<td align="right">2</td>
+<td align="left">BCL11A,SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Themis_Sema3a</td>
+<td align="right">4</td>
+<td align="left">ATXN1,SCN1A,STAT4,TTC21B</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Crh</td>
+<td align="right">3</td>
+<td align="left">GABRA2,PCDH7,ZEB2</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Lamp5_Nmbr</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Nos1</td>
+<td align="right">1</td>
+<td align="left">SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Nckap5</td>
+<td align="right">1</td>
+<td align="left">ZEB2</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Pax6</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Pvalb_Crh</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Pvalb_Lgr5</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Pvalb_Nos1</td>
+<td align="right">2</td>
+<td align="left">GABRA2,SCN3A</td>
+</tr>
+<tr class="even">
+<td align="left">Pvalb_Sulf1</td>
+<td align="right">3</td>
+<td align="left">GABRA2,GRIK1,SCN3A</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Calb1</td>
+<td align="right">3</td>
+<td align="left">FANCL,GRIK1,KCNN2</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Isoc1</td>
+<td align="right">2</td>
+<td align="left">GRIK1,KCNAB1</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Nos1</td>
+<td align="right">2</td>
+<td align="left">SCN1A,TTC21B</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Stk32a</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Tac1</td>
+<td align="right">2</td>
+<td align="left">KCNAB1,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Tac3</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Th</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Abi3bp</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Cbln1</td>
+<td align="right">3</td>
+<td align="left">BCL11A,GRIK1,PCDH7</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Crh</td>
+<td align="right">1</td>
+<td align="left">KCNN2</td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Nrg1</td>
+<td align="right">3</td>
+<td align="left">GABRA2,GRIK1,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Sema3c</td>
+<td align="right">1</td>
+<td align="left">SCN2A</td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Sstr1</td>
+<td align="right">1</td>
+<td align="left">GABRA2</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Tyr</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="ep-genes" class="section level3">
+<h3>EP genes</h3>
+<pre class="r"><code>ep_test_res &lt;- fTestPerDe(de_genes_filt, ep_genes, expressed_genes) %&gt;% 
+  mutate(Type=factor(Type, levels=type_order))
+
+p_ep_genes &lt;- plotFTestResults(ep_test_res, neuron_type_per_type, y.max=15, y.lab=&quot;Enrichment statistic\nfor epilepsy-related genes&quot;) +
+  div_fill_scale
+
+ggsave(outPath(&quot;epilepsy_enrichment.pdf&quot;), p_ep_genes, width=7, height=4)
+
+p_ep_genes</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ep_enrich_rank_df &lt;- ep_test_res %$% 
+  tibble(Type=as.character(Type), Stat=stat, Affected=(stat &gt; 1), HighlyAffected=(stat_min &gt; 0.75)) %&gt;% 
+  mutate(Rank=setNames(-Stat, Type) %&gt;% split(neuron_type_per_type[Type]) %&gt;% lapply(rank) %&gt;% Reduce(c, .) %&gt;% .[Type], 
+         StatType=&quot;EPEnrichment&quot;)</code></pre>
+<pre class="r"><code>ep_hits_lst &lt;- lapply(de_filtered, function(x) sort(intersect(rownames(x), ep_genes)))
+ep_hits &lt;- tibble(Type=factor(names(ep_hits_lst), levels=type_order),
+                  NHits=sapply(ep_hits_lst, length),
+                  Hits=sapply(ep_hits_lst, paste,collapse=&quot;,&quot;)) %&gt;% 
+  arrange(Type)
+write_csv(ep_hits, outPath(&quot;ep_hits.csv&quot;))
+ep_hits</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Type</th>
+<th align="right">NHits</th>
+<th align="left">Hits</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">L2_3_Cux2_Frem3</td>
+<td align="right">11</td>
+<td align="left">ALG13,CNTNAP2,DCX,GABRA1,KCND2,NPY,PCSK1,PLCB1,PNKP,SCN1A,WWOX</td>
+</tr>
+<tr class="even">
+<td align="left">L2_Cux2_Lamp5</td>
+<td align="right">13</td>
+<td align="left">ALG13,CNTNAP2,DCX,GABRA1,KCND2,NLGN1,NPY,NRG1,PCSK1,PLCB1,PNKP,SCN1A,VRK2</td>
+</tr>
+<tr class="odd">
+<td align="left">L3_Cux2_Prss12</td>
+<td align="right">12</td>
+<td align="left">ALG13,DCX,GABRA1,IQSEC2,KCND2,NPY,PCSK1,PLCB1,PNKP,PVALB,SCN1A,SV2C</td>
+</tr>
+<tr class="even">
+<td align="left">L4_Rorb_Arhgap15</td>
+<td align="right">7</td>
+<td align="left">ALG13,GABRA1,NEDD4L,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L4_Rorb_Met</td>
+<td align="right">10</td>
+<td align="left">ALG13,DCX,GABRA1,IQSEC2,NPY,PCSK1,PLCB1,PNKP,SNAP25,SV2C</td>
+</tr>
+<tr class="even">
+<td align="left">L4_Rorb_Mme</td>
+<td align="right">9</td>
+<td align="left">ALG13,GABRA1,IL1RAPL1,IQSEC2,KCND2,PCSK1,PLCB1,PNKP,SNAP25</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Lrrk1_Pcp4</td>
+<td align="right">9</td>
+<td align="left">ALG13,GABRA1,KCND2,LGI1,NPY,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Fezf2_Lrrk1_Sema3e</td>
+<td align="right">10</td>
+<td align="left">ALG13,CCDC88A,GABRA1,GABRB3,KCND2,PCSK1,PLCB1,PNKP,SCN1A,SNAP25</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Tle4_Abo</td>
+<td align="right">15</td>
+<td align="left">ALG13,AUTS2,CCDC88A,ERBB4,GABRA1,KCND2,NEDD4L,NLGN1,NPY,NRG1,NRG3,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Fezf2_Tle4_Htr2c</td>
+<td align="right">7</td>
+<td align="left">FLNA,GABRA1,KCND2,NLGN1,NPY,PCSK1,SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Fezf2_Tle4_Scube1</td>
+<td align="right">7</td>
+<td align="left">ERBB4,GABRA1,HNRNPH1,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">L5_6_Themis_Ntng2</td>
+<td align="right">9</td>
+<td align="left">CACNA1A,CNTNAP2,HSF1,LGI1,NRG1,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="odd">
+<td align="left">L5_6_Themis_Sema3a</td>
+<td align="right">9</td>
+<td align="left">ALG13,GABRA1,IL1RAPL1,KCND2,NRG1,PCSK1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Crh</td>
+<td align="right">6</td>
+<td align="left">DLX6,ERBB4,GABRA1,GOLIM4,PNKP,SV2C</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Lamp5_Nmbr</td>
+<td align="right">5</td>
+<td align="left">GABRA1,GOLIM4,PNKP,RELN,SV2C</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Nos1</td>
+<td align="right">7</td>
+<td align="left">DLX6,GOLIM4,NPY,PLCB1,PNKP,SCN1A,SV2C</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Nckap5</td>
+<td align="right">2</td>
+<td align="left">GABRA1,PNKP</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Pax6</td>
+<td align="right">3</td>
+<td align="left">GABRA1,PNKP,RELN</td>
+</tr>
+<tr class="odd">
+<td align="left">Pvalb_Crh</td>
+<td align="right">2</td>
+<td align="left">ALG13,GNAO1</td>
+</tr>
+<tr class="even">
+<td align="left">Pvalb_Lgr5</td>
+<td align="right">3</td>
+<td align="left">CACNA1A,CNTNAP2,GABRA1</td>
+</tr>
+<tr class="odd">
+<td align="left">Pvalb_Nos1</td>
+<td align="right">6</td>
+<td align="left">ARX,CNTNAP2,GABRA1,NPY,PNKP,PVALB</td>
+</tr>
+<tr class="even">
+<td align="left">Pvalb_Sulf1</td>
+<td align="right">5</td>
+<td align="left">ARX,CNTNAP2,NPY,PNKP,PVALB</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Calb1</td>
+<td align="right">6</td>
+<td align="left">ARX,IQSEC2,KCND2,LGI1,PNKP,PVALB</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Isoc1</td>
+<td align="right">4</td>
+<td align="left">CACNA1A,GABRA1,GABRB3,GRIN2B</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Nos1</td>
+<td align="right">7</td>
+<td align="left">ARX,CAMTA1,GABRA1,LGI1,NPY,NRG1,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Stk32a</td>
+<td align="right">8</td>
+<td align="left">ALG13,CACNA1A,CAMTA1,CNTNAP2,HNRNPU,IL1RAPL1,NPY,RELN</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Tac1</td>
+<td align="right">7</td>
+<td align="left">ARX,CAMTA1,CNTNAP2,NPY,NRG1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Sst_Tac3</td>
+<td align="right">6</td>
+<td align="left">ARX,CNTNAP2,IL1RAPL1,NPY,PNKP,RELN</td>
+</tr>
+<tr class="odd">
+<td align="left">Sst_Th</td>
+<td align="right">2</td>
+<td align="left">ERBB4,GABRA1</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Abi3bp</td>
+<td align="right">0</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Cbln1</td>
+<td align="right">4</td>
+<td align="left">DLX1,GRIN2B,RELN,SV2A</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Crh</td>
+<td align="right">2</td>
+<td align="left">GABRA1,PNKP</td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Nrg1</td>
+<td align="right">7</td>
+<td align="left">GABRA1,LGI1,NPY,NRG1,PLCB1,PNKP,SCN1A</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Sema3c</td>
+<td align="right">7</td>
+<td align="left">ARX,DLX1,GABRA1,KCND2,NPY,PNKP,SCN2A</td>
+</tr>
+<tr class="odd">
+<td align="left">Vip_Sstr1</td>
+<td align="right">2</td>
+<td align="left">GABRA1,PNKP</td>
+</tr>
+<tr class="even">
+<td align="left">Vip_Tyr</td>
+<td align="right">3</td>
+<td align="left">KCND2,NLGN1,PNKP</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>unlist(ep_hits_lst) %&gt;% table()</code></pre>
+<pre><code>.
+   ALG13      ARX    AUTS2  CACNA1A   CAMTA1  CCDC88A  CNTNAP2      DCX 
+      12        7        1        4        3        2        9        4 
+    DLX1     DLX6    ERBB4     FLNA   GABRA1   GABRB3    GNAO1   GOLIM4 
+       2        2        4        1       25        2        1        3 
+  GRIN2B  HNRNPH1   HNRNPU     HSF1 IL1RAPL1   IQSEC2    KCND2     LGI1 
+       2        1        1        1        4        4       12        5 
+  NEDD4L    NLGN1      NPY     NRG1     NRG3    PCSK1    PLCB1     PNKP 
+       2        4       16        7        1       13       14       27 
+   PVALB     RELN    SCN1A    SCN2A   SNAP25     SV2A     SV2C     VRK2 
+       4        5       15        1        3        1        5        1 
+    WWOX 
+       1 </code></pre>
+</div>
+</div>
+<div id="disorder-genes" class="section level2">
+<h2>Disorder Genes</h2>
+<pre class="r"><code>dos &lt;- pblapply(de_gene_ids, enrichDO, ont=&quot;DO&quot;, readable=T, pAdjustMethod=&#39;BH&#39;, minGSSize=5, pvalueCutoff=0.99) %&gt;% 
+  lapply(function(x) x@result)
+dos %&lt;&gt;% names() %&gt;% setNames(., .) %&gt;% lapply(function(n) mutate(dos[[n]], Type=n))
+do_df &lt;- lapply(dos, function(x) filter(x, p.adjust &lt; 0.05)) %&gt;% .[sapply(., nrow) &gt; 0] %&gt;% 
+  bind_rows() %&gt;% dplyr::select(Type, ID, Description, GeneRatio, geneID, pvalue, p.adjust, qvalue)
+
+write_csv(do_df, outPath(&quot;disease_ontology_hits.csv&quot;))
+head(do_df)</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Type</th>
+<th align="left">ID</th>
+<th align="left">Description</th>
+<th align="left">GeneRatio</th>
+<th align="left">geneID</th>
+<th align="right">pvalue</th>
+<th align="right">p.adjust</th>
+<th align="right">qvalue</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Id2_Lamp5_Crh</td>
+<td align="left">DOID:1826</td>
+<td align="left">epilepsy syndrome</td>
+<td align="left">13/142</td>
+<td align="left">GRIA2/GRIA3/GABRA1/STXBP1/DLG2/GRIA1/GAD2/SERPINI1/GABBR1/GAD1/HCN1/PRNP/GABRB2</td>
+<td align="right">0.0000540</td>
+<td align="right">0.0211087</td>
+<td align="right">0.0208558</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Crh</td>
+<td align="left">DOID:3328</td>
+<td align="left">temporal lobe epilepsy</td>
+<td align="left">6/142</td>
+<td align="left">GRIA2/GRIA3/GRIA1/GABBR1/PRNP/GABRB2</td>
+<td align="right">0.0002089</td>
+<td align="right">0.0408477</td>
+<td align="right">0.0403584</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Lamp5_Nos1</td>
+<td align="left">DOID:3328</td>
+<td align="left">temporal lobe epilepsy</td>
+<td align="left">8/123</td>
+<td align="left">GRIA2/GRIA3/GABBR1/OPRM1/SCN1A/GRIA1/PRNP/GABRB2</td>
+<td align="right">0.0000007</td>
+<td align="right">0.0002437</td>
+<td align="right">0.0002372</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Lamp5_Nos1</td>
+<td align="left">DOID:2234</td>
+<td align="left">focal epilepsy</td>
+<td align="left">8/123</td>
+<td align="left">GRIA2/GRIA3/GABBR1/OPRM1/SCN1A/GRIA1/PRNP/GABRB2</td>
+<td align="right">0.0000028</td>
+<td align="right">0.0005270</td>
+<td align="right">0.0005129</td>
+</tr>
+<tr class="odd">
+<td align="left">Id2_Lamp5_Nos1</td>
+<td align="left">DOID:1826</td>
+<td align="left">epilepsy syndrome</td>
+<td align="left">11/123</td>
+<td align="left">GRIA2/GRIA3/GABBR1/RCN2/OPRM1/KCTD7/SCN1A/SERPINI1/GRIA1/PRNP/GABRB2</td>
+<td align="right">0.0002508</td>
+<td align="right">0.0310194</td>
+<td align="right">0.0301877</td>
+</tr>
+<tr class="even">
+<td align="left">Id2_Pax6</td>
+<td align="left">DOID:1826</td>
+<td align="left">epilepsy syndrome</td>
+<td align="left">9/75</td>
+<td align="left">ADAM22/GRIA2/KCTD7/GAD1/GABRA1/RELN/L2HGDH/GABRB2/STXBP1</td>
+<td align="right">0.0000991</td>
+<td align="right">0.0255716</td>
+<td align="right">0.0247266</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="go" class="section level2">
+<h2>GO</h2>
+<p>Autopsy genes:</p>
+<pre class="r"><code>table_path &lt;- MetadataPath(&quot;tissue_signatures_allen.xlsx&quot;)
+neurosurgery_genes &lt;- openxlsx::read.xlsx(table_path)$gene %&gt;% intersect(rownames(cm_merged))
+autopsy_genes &lt;- openxlsx::read.xlsx(table_path, sheet=2)$gene %&gt;% intersect(rownames(cm_merged))
+
+auto_surg_genes &lt;- union(autopsy_genes, neurosurgery_genes)</code></pre>
+<div id="estimate-go" class="section level3">
+<h3>Estimate GO</h3>
+<pre class="r"><code>go_datas &lt;- c(&quot;BP&quot;, &quot;CC&quot;, &quot;MF&quot;) %&gt;% setNames(., .) %&gt;%
+  pblapply(function(n) clusterProfiler:::get_GO_data(org.Hs.eg.db, n, &quot;ENTREZID&quot;) %&gt;%
+             as.list() %&gt;% as.environment()) # otherwise it pass reference to the environment content
+
+# gos &lt;- c(&quot;BP&quot;, &quot;CC&quot;, &quot;MF&quot;) %&gt;% setNames(., .) %&gt;% lapply(function(ont)
+#   pblapply(de_gene_ids, enrichGO, ont=ont, readable=T,  pAdjustMethod=&#39;BH&#39;, OrgDb=org.Hs.eg.db)) %&gt;%
+#   lapply(lapply, function(x) x@result)
+
+gos &lt;- names(go_datas) %&gt;% setNames(., .) %&gt;% lapply(function(ont)
+  pblapply(de_gene_ids, enrichGOOpt, ont=ont, goData=go_datas[[ont]], universe=measured_universe,
+           readable=T, pAdjustMethod=&#39;BH&#39;, OrgDb=org.Hs.eg.db, cl=45)) %&gt;%
+  lapply(lapply, function(x) x@result)
+
+gos %&lt;&gt;% lapply(lapply, function(x)
+  mutate(x, AutopsyFraction=strsplit(geneID, &quot;/&quot;) %&gt;%
+           sapply(function(x) mean(x %in% auto_surg_genes))))</code></pre>
+<pre class="r"><code>gos_filt &lt;- lapply(gos, lapply, function(x) filter(x, p.adjust &lt; 0.05, AutopsyFraction &lt; 0.201))
+
+gos_joint &lt;- lapply(gos_filt, function(gt) 
+  gt %&gt;% .[sapply(., nrow) &gt; 0] %&gt;% names() %&gt;% setNames(., .) %&gt;% 
+    lapply(function(n) cbind(gt[[n]], Type=n)) %&gt;% Reduce(rbind, .))
+
+names(gos_joint) %&gt;% lapply(function(n)
+  gos_joint[[n]] %&gt;% mutate(GO=n) %&gt;% 
+    dplyr::select(GO, Type, ID, Description, GeneRatio, AutopsyFraction, geneID, pvalue, p.adjust, qvalue)) %&gt;% 
+  bind_rows() %&gt;% 
+  write_csv(outPath(&quot;gene_ontology_hits.csv&quot;))</code></pre>
+<pre class="r"><code># clust_info &lt;- prepareGOHeatmapClustered(gos_joint$BP, type_order)
+# clust_info$gg</code></pre>
+</div>
+<div id="dependencies" class="section level3">
+<h3>Dependencies</h3>
+<pre class="r"><code>library(ggrepel)
+
+plotNCellRegression &lt;- function(n, n.cell.per.type, neuron.type, n.name=&quot;N&quot;, legend.pos=c(1, 0)) {
+  p.df &lt;- data.frame(N=n) %&gt;% as_tibble(rownames=&quot;Type&quot;) %&gt;% 
+    mutate(NCells=as.vector(n.cell.per.type[Type])) %&gt;% 
+    mutate(NeuronType=neuron.type[Type])
+
+  ggplot(p.df, aes(x=NCells, y=N)) + 
+    # geom_smooth(aes(color=NeuronType), method=MASS::rlm, se=0) +
+    geom_point(aes(color=NeuronType)) + 
+    geom_label_repel(aes(label=Type), size=2, min.segment.length=0.1, box.padding=0, label.size=0, max.iter=300, fill=alpha(&quot;white&quot;, 0.4)) +
+    scale_x_log10() + 
+    scale_color_manual(values=kNtColors) +
+    ylim(0, max(p.df$N)) + labs(x=&quot;Number of cells&quot;, y=n.name) +
+    theme(legend.position=legend.pos, legend.justification=legend.pos, legend.background=element_rect(fill=alpha(&quot;white&quot;, 0.4))) +
+    guides(color=guide_legend(title=&quot;Neuron type&quot;))
+}</code></pre>
+<pre class="r"><code>n_cell_per_type &lt;- table(annotation)
+n_gos_per_type &lt;- sapply(gos_filt, sapply, nrow) %&gt;% rowSums()
+n_exp_de_per_type &lt;- sapply(de_genes_filt, length)</code></pre>
+<pre class="r"><code>plot_grid(
+  n_gos_per_type %&gt;% 
+    plotNCellRegression(n_exp_de_per_type, neuron.type=neuron_type_per_type, n.name=&quot;Number of GO Terms&quot;) +
+    geom_smooth(method=MASS::rlm, se=0, color=&quot;black&quot;, size=0.5) +
+    scale_x_continuous(name=&quot;Number of highly-expressed DE genes&quot;),
+  sapply(gos_filt, sapply, nrow) %&gt;% rowSums() %&gt;% 
+    plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name=&quot;Number of GO Terms&quot;),
+  ncol=1, labels=c(&quot;a&quot;, &quot;b&quot;), label_x=0.01
+)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_gos_vs_ns.pdf&quot;), width=7, height=8)</code></pre>
+<pre class="r"><code>sapply(de_filtered, nrow) %&gt;% 
+  plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name=&quot;Number of DE genes&quot;) +
+  scale_y_log10()</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_de_vs_n_cells.pdf&quot;), width=7, height=5)
+
+n_exp_de_per_type %&gt;% 
+  plotNCellRegression(n_cell_per_type, neuron.type=neuron_type_per_type, n.name=&quot;Number of highly-expressed DE genes&quot;) +
+  geom_smooth(aes(color=NeuronType), method=MASS::rlm, se=0, size=0.5)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-24-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_de_expr_vs_n_cells.pdf&quot;), width=7, height=5)
+
+p_df &lt;- sapply(gos_filt, sapply, nrow) %&gt;% as_tibble(rownames=&quot;Type&quot;) %&gt;% 
+  reshape2::melt(id.vars=&quot;Type&quot;, variable.name=&quot;GO&quot;, value.name=&quot;N&quot;) %&gt;% 
+  mutate(Type=factor(Type, levels=type_order))
+
+gg_n_gos &lt;- ggplot(p_df) +
+  geom_bar(aes(x=Type, y=N, fill=GO), stat=&quot;identity&quot;) +
+  scale_y_continuous(expand=c(0, 0), limits=c(0, 300)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), 
+        panel.grid.major.x=element_blank(), legend.position=c(1, 1), legend.justification=c(1, 1)) +
+  labs(x=&quot;&quot;, y=&quot;#Pathways&quot;)
+
+gg_n_gos</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-24-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_gos_per_type.pdf&quot;), width=7, height=5)</code></pre>
+</div>
+<div id="ranking" class="section level3">
+<h3>Ranking</h3>
+<pre class="r"><code>n_gos_per_type &lt;- sapply(gos_filt, sapply, nrow) %&gt;% rowSums()
+n_exp_de_per_type &lt;- sapply(de_genes_filt, length)
+
+reg_res &lt;- MASS::rlm(n_exp_de_per_type, n_gos_per_type)$residuals
+n_go_rank_df &lt;- tibble(Type=names(reg_res), Stat=reg_res, Affected=(reg_res &gt; 0), 
+                       HighlyAffected=(reg_res %&gt;% `&gt;`(quantile(.[. &gt; 0], 0.75)))) %&gt;% 
+  mutate(Rank=setNames(-Stat, Type) %&gt;% split(neuron_type_per_type[Type]) %&gt;% lapply(rank) %&gt;% Reduce(c, .) %&gt;% .[Type], 
+         StatType=&quot;GONumber&quot;)</code></pre>
+<pre class="r"><code>types_per_nt &lt;- split(names(neuron_type_per_type), neuron_type_per_type)
+n_de_rank_df &lt;- types_per_nt %&gt;% lapply(function(ns) {
+  reg.res &lt;- MASS::rlm(log10(n_cell_per_type[ns]), n_exp_de_per_type[ns])$residuals
+  tibble(Type=names(reg.res), Stat=reg.res, Affected=(reg.res &gt; 0), 
+         HighlyAffected=(reg.res %&gt;% `&gt;`(quantile(.[. &gt; 0], 0.75))), 
+         Rank=rank(-reg.res), StatType=&quot;DENumber&quot;)
+}) %&gt;% Reduce(rbind, .)</code></pre>
+<pre class="r"><code>rbind(ep_enrich_rank_df, gwas_rank_df, n_go_rank_df, n_de_rank_df) %&gt;% 
+  write_csv(OutputPath(&quot;total_ranking&quot;, &quot;go.csv&quot;))</code></pre>
+</div>
+<div id="clustering" class="section level3">
+<h3>Clustering</h3>
+<pre class="r"><code>clust_df &lt;- clusterIndividualGOs(gos_joint$BP, 0.66) %&gt;%
+  .[, type_order[type_order %in% colnames(.)]]</code></pre>
+<pre class="r"><code># plotIndividualClustersPerGO(clust_df, clust_info$order)</code></pre>
+<pre class="r"><code>cl_dists &lt;- pbapply(clust_df, 1, function(ct1) apply(clust_df, 1, function(ct2) {
+  mask &lt;- !is.na(ct1) &amp; !is.na(ct2)
+  if (sum(mask) == 0) 1 else (1 - mean(ct1[mask] == ct2[mask]))
+}))
+
+cl_clusts &lt;- as.dist(cl_dists) %&gt;% hclust(method=&quot;average&quot;)
+clusts &lt;- cutree(cl_clusts, h=0.5)
+
+# split(names(clusts), clusts)
+
+c(length(clusts), length(unique(clusts)))</code></pre>
+<pre><code>[1] 446 186</code></pre>
+<pre class="r"><code>plotNumberOfClustersPerHeight(cl_clusts, step=0.01)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-30-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>gos_joint$BP %&lt;&gt;% mutate(GOClust=clusts[Description])
+
+name_per_clust &lt;- gos_joint$BP %&gt;% group_by(GOClust, Description) %&gt;% summarise(pvalue=exp(mean(log(pvalue)))) %&gt;% 
+  split(.$GOClust) %&gt;% sapply(function(df) df$Description[which.min(df$pvalue)])
+
+gos_joint$BP %&lt;&gt;% mutate(GOClustName=name_per_clust[as.character(GOClust)])
+
+go_bp_summ_df &lt;- gos_joint$BP %&gt;% group_by(Type, GOClustName) %&gt;% 
+  summarise(p.adjust=min(p.adjust)) %&gt;% ungroup() %&gt;% rename(Description=GOClustName)
+
+gos_joint$BP %$% split(Description, GOClustName) %&gt;% lapply(unique) %&gt;% 
+  sapply(function(x) paste0(&quot;&#39;&quot;, x, &quot;&#39;&quot;, collapse=&quot;; &quot;)) %&gt;%
+  tibble(Group=names(.), Pathways=.) %&gt;% write_csv(outPath(&quot;bp_pathway_clustering.csv&quot;))</code></pre>
+</div>
+<div id="overview" class="section level3">
+<h3>Overview</h3>
+<p>Supp. Figure 13:</p>
+<pre class="r"><code>t_df &lt;- go_bp_summ_df %&gt;% mutate(p.adjust=-log10(p.adjust)) %&gt;% 
+  tidyr::spread(Type, p.adjust) %&gt;% as.data.frame() %&gt;% set_rownames(.$Description) %&gt;% .[, 2:ncol(.)] %&gt;% 
+  .[, type_order[type_order %in% colnames(.)]] %&gt;% 
+  .[rowSums(!is.na(.)) == 1,] %&gt;% .[, colSums(!is.na(.)) &gt; 0]
+t_df[is.na(t_df)] &lt;- 0
+
+colored_types &lt;- which(colSums(t_df &gt; 0) &gt;= 5) %&gt;% names()
+color_per_type &lt;- rep(&quot;black&quot;, length(type_order)) %&gt;% setNames(type_order)
+color_per_type[colored_types] &lt;- ifelse(neuron_type_per_type[colored_types] == &quot;Excitatory&quot;, &quot;red&quot;, &quot;green&quot;)
+
+plotGOHeatmap(t_df, color_per_type, legend.position=c(2.1, 0.93)) +
+  gNtVline(neuron_type_per_type)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-32-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;go_pvals_single.pdf&quot;), width=8, height=11)</code></pre>
+<p>Supp. Figure 9:</p>
+<pre class="r"><code>color_per_type &lt;- ifelse(neuron_type_per_type == &quot;Excitatory&quot;, &quot;red&quot;, &quot;green&quot;)
+clust_info &lt;- prepareGOHeatmapClustered(go_bp_summ_df, type_order, color.per.type=color_per_type, 
+                                        cut.h=2.5, method=&quot;ward.D&quot;, min.rows.per.clust=7)
+clust_info$gg</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-33-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;go_pvals_shared.pdf&quot;), width=8, height=11)</code></pre>
+<p>Figure 3b:</p>
+<pre class="r"><code>go_per_cl &lt;- clust_info$ann %$% 
+  split(Type, value)[as.character(unique(value[!is.na(value)]))] %&gt;% rev()
+rel_heights &lt;- sapply(go_per_cl, length) %&gt;% .[1:(length(.)-1)] %&gt;% c(22)
+
+lapply(1:length(go_per_cl), function(i) {
+  p.df &lt;- clust_info$df[as.character(go_per_cl[[i]]),]
+  gg &lt;- plotGOHeatmap(p.df, clust_info$color.per.type, legend.position=c(1.9, 1), row.order=T, legend.title.size=10) +
+    gNtVline(neuron_type_per_type) +
+    theme(plot.margin=margin(), legend.key.height=unit(0.2, &quot;in&quot;))
+
+  if (i != length(go_per_cl)) {
+    gg &lt;- gg + theme(axis.text.x=element_blank())
+  }
+
+  if (i != 1) {
+    gg &lt;- gg + theme(legend.position=&quot;none&quot;)
+  }
+  return(gg)
+}) %&gt;% 
+  plot_grid(plotlist=., ncol=1, align=&quot;v&quot;, rel_heights=rel_heights)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-34-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;f3b_go_pvals_clustered.pdf&quot;), width=8, height=10)</code></pre>
+<pre class="r"><code>top_clust &lt;- clust_info$ann %$% split(as.character(Type), value) %&gt;% 
+  sapply(function(x) sum(go_bp_summ_df$Description %in% x)) %&gt;% 
+  which.max() %&gt;% names()
+
+as.character(go_per_cl[[top_clust]])</code></pre>
+<pre><code> [1] &quot;regulation of postsynaptic membrane potential&quot; 
+ [2] &quot;modulation of chemical synaptic transmission&quot;  
+ [3] &quot;regulation of membrane potential&quot;              
+ [4] &quot;regulation of striated muscle contraction&quot;     
+ [5] &quot;axon development&quot;                              
+ [6] &quot;synapse assembly&quot;                              
+ [7] &quot;synapse organization&quot;                          
+ [8] &quot;central nervous system neuron development&quot;     
+ [9] &quot;dendritic spine development&quot;                   
+[10] &quot;positive regulation of developmental growth&quot;   
+[11] &quot;establishment of synaptic vesicle localization&quot;
+[12] &quot;positive regulation of neurogenesis&quot;           
+[13] &quot;dendrite development&quot;                          
+[14] &quot;regulation of neuron projection development&quot;   </code></pre>
+<pre class="r"><code>gpt_mats &lt;- go_per_cl[[top_clust]] %&gt;% as.character() %&gt;% setNames(., .) %&gt;% 
+  lapply(getGenePathwayMatrix, gos_joint$BP, de_filtered)
+
+names(gpt_mats) %&gt;% pblapply(function(gon) {
+  p.df &lt;- gpt_mats[[gon]] %&gt;% pmax(-10) %&gt;% pmin(10) %&gt;% 
+    t() %&gt;% .[rowSums(abs(.) &gt; 0.1) &gt; 1,]
+  cl.info &lt;- estimateHeatmapClusters(abs(p.df) &gt; 0.1, cut.h=0.5, min.rows.per.clust=3, distance=&quot;binary&quot;,
+                                     neuron.type.per.type=neuron_type_per_type)
+
+  gg &lt;- plotGOHeatmap(p.df, col.order=type_order, legend.title=&quot;Z-score&quot;, row.order=cl.info$order) +
+    scale_fill_distiller(palette=&quot;RdBu&quot;, limits=c(-10, 10)) +
+    gNtVline(neuron_type_per_type) +
+    geom_rect(aes(xmin=x1, xmax=x2, ymin=y1 + 0.5, ymax=y2 + 0.5), cl.info$rect, color=&quot;black&quot;, fill=&quot;transparent&quot;, size=1) +
+    ggtitle(gon)
+  
+  ggsave(outPath(&quot;pathway_clustering&quot;, paste0(gon, &quot;.pdf&quot;)), gg, width=6, height=nrow(p.df) * 0.12 + 2)
+
+  gg
+})</code></pre>
+<pre><code>[[1]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-1.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[2]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-2.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[3]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-3.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[4]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-4.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[5]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-5.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[6]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-6.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[7]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-7.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[8]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-8.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[9]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-9.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[10]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-10.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[11]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-11.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[12]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-12.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[13]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-13.png" width="480" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[14]]</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-36-14.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="embeddings-of-pathways" class="section level3">
+<h3>Embeddings of pathways</h3>
+<pre class="r"><code>gp_embs &lt;- clust_info$ann %$% split(Type, value) %&gt;% lapply(as.character) %&gt;% 
+  pblapply(embedPathwayTypesUmap, gos_joint$BP, spread=1.5, min_dist=0.2)</code></pre>
+<pre class="r"><code>ggs &lt;- lapply(gp_embs, function(emb) {
+  plot.df &lt;- as_tibble(emb, rownames=&quot;Name&quot;) %&gt;% 
+    mutate(Type=sapply(strsplit(Name, &quot;!&quot;), `[`, 2), Pathway=sapply(strsplit(Name, &quot;!&quot;), `[`, 1)) %&gt;% 
+    dplyr::rename(X=V1, Y=V2) %&gt;% 
+    mutate(NeuronType=neuron_type_per_type[Type], Type=factor(Type, levels=type_order))
+  p.theme &lt;- theme(axis.text=element_blank(), axis.title=element_blank(), 
+                   axis.ticks=element_blank(), plot.margin=margin(), legend.justification=&quot;top&quot;,
+                   legend.key.size=unit(10, &quot;pt&quot;), legend.key=element_blank(),
+                   legend.position=&quot;bottom&quot;, legend.direction=&quot;vertical&quot;)
+  point.size &lt;- 1.75
+  point.alpha &lt;- 0.75
+
+  color.vals &lt;- type_order %&gt;% split(neuron_type_per_type[.]) %&gt;% 
+    lapply(sccore::fac2col) %&gt;% lapply(sample) %&gt;% unlist(use.names=F)
+  cowplot::plot_grid(
+    ggplot(plot.df) + 
+      geom_point(aes(x=X, y=Y, color=Type, shape=NeuronType), size=point.size, alpha=point.alpha) +
+      scale_shape_manual(values=c(17, 19)) +
+      scale_color_manual(values=color.vals) +
+      p.theme
+    ,
+    ggplot(plot.df, aes(x=X, y=Y, shape=NeuronType)) + 
+      geom_point(aes(color=Pathway), size=point.size, alpha=point.alpha) +
+      scale_shape_manual(values=c(17, 19), guide=F) +
+      p.theme
+    , ncol=2, align=&quot;h&quot;
+    )
+})</code></pre>
+<pre><code>Warning: `as_tibble.matrix()` requires a matrix with column names or a `.name_repair` argument. Using compatibility `.name_repair`.
+This warning is displayed once per session.</code></pre>
+<pre class="r"><code>for (i in 1:length(ggs)) {
+  ggsave(outPath(&quot;pathway_clustering&quot;, paste0(&quot;cluster&quot;, i, &quot;_umap.pdf&quot;)), ggs[[i]], width=9, height=7)
+}
+
+ggs</code></pre>
+<pre><code>$`1`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-1.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`2`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-2.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`3`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-3.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`4`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-4.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`10`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-5.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`11`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-6.png" width="864" style="display: block; margin: auto;" /></p>
+<pre><code>
+$`12`</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-38-7.png" width="864" style="display: block; margin: auto;" /></p>
+</div>
+<div id="clustering-cell-types-by-go" class="section level3">
+<h3>Clustering cell types by GO</h3>
+<pre class="r"><code>p_mat &lt;- estimateTypeSimilarityOverPathways(gos_filt[&quot;BP&quot;])
+t_cpt &lt;- setNames(kNtColors[neuron_type_per_type], names(neuron_type_per_type))
+plotTypeSimilarityOverPathways(p_mat, 1.2, color.per.type=t_cpt, max.val=0.4)</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-39-1.png" width="720" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;type_clustering_by_go.pdf&quot;))</code></pre>
+</div>
+<div id="ampa" class="section level3">
+<h3>AMPA</h3>
+<pre class="r"><code>cm_collapsed &lt;- conos:::collapseCellsByType(Matrix::t(cm_merged), annot_filt, min.cell.count=0)
+cm_collapsed_norm &lt;- cm_collapsed / rowSums(cm_collapsed)</code></pre>
+<pre class="r"><code>ampa_info &lt;- getPathwayGeneExpression(de, &quot;AMPA glutamate receptor complex&quot;, gos$CC, cm.collapsed=cm_collapsed_norm, 
+                                      type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+glutamate_info &lt;- getPathwayGeneExpression(de, &quot;glutamate receptor signaling pathway&quot;, gos$BP, cm.collapsed=cm_collapsed_norm, 
+                                           type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+action_info &lt;- getPathwayGeneExpression(de, &quot;action potential&quot;, gos$BP, cm.collapsed=cm_collapsed_norm, 
+                                        type.order=type_order, neuron.type.per.type=neuron_type_per_type)
+
+ggsave(outPath(&quot;gene_scattermaps&quot;, &quot;ampa_genes.pdf&quot;), ampa_info$gg, width=8, height=3.5)
+ggsave(outPath(&quot;gene_scattermaps&quot;, &quot;glutamate_genes.pdf&quot;), glutamate_info$gg, width=8, height=7)
+ggsave(outPath(&quot;gene_scattermaps&quot;, &quot;action_genes.pdf&quot;), action_info$gg, width=8, height=6)</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<pre class="r"><code>p_theme_base &lt;- theme(plot.margin=margin(), axis.text.y=element_text(size=7))
+cowplot::plot_grid(
+  ampa_info$gg + theme(legend.position=&quot;none&quot;, axis.text.x=element_blank(), axis.ticks.x=element_blank()) + p_theme_base,
+  glutamate_info$gg + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank()) + p_theme_base,
+  action_info$gg + theme(legend.position=&quot;none&quot;) + p_theme_base,
+  ncol=1, align=&quot;v&quot;, axis=&quot;rl&quot;, rel_heights=c(0.6, 1.7, 2)
+)</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-41-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>total_df &lt;- data.frame(Action=colSums((abs(action_info$stat) &gt; 3) &amp; (action_info$expr &gt; 0.5)), 
+                       Glutamate=colSums((abs(glutamate_info$stat) &gt; 3) &amp; (glutamate_info$expr &gt; 0.5)), 
+                       AMPA=colSums((abs(glutamate_info$stat) &gt; 3) &amp; (glutamate_info$expr &gt; 0.5))) %&gt;% 
+  as_tibble(rownames=&quot;Type&quot;) %&gt;% reshape2::melt(id.var=&quot;Type&quot;, variable.name=&quot;Pathway&quot;) %&gt;% 
+  mutate(Type=factor(Type, levels=type_order))
+
+ggplot(total_df) +
+  geom_bar(aes(x=Type, y=value, fill=Pathway), stat=&quot;identity&quot;) +
+  scale_y_continuous(expand=c(0, 0), limits=c(0, 50)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), panel.grid.major.x=element_blank()) +
+  theme_pdf(legend.pos=c(1, 1)) + labs(x=&quot;&quot;, y=&quot;#Genes&quot;)</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_bar).</code></pre>
+<p><img src="figure/fig_go.Rmd/unnamed-chunk-42-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_de_genes.pdf&quot;))</code></pre>
+<pre><code>Saving 7 x 4 in image</code></pre>
+<pre><code>Warning: Removed 1 rows containing missing values (geom_bar).</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>data.frame(value=unlist(sessioninfo::platform_info()))</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>version</td>
+<td align="left">R version 3.5.1 (2018-07-02)</td>
+</tr>
+<tr class="even">
+<td>os</td>
+<td align="left">Ubuntu 18.04.2 LTS</td>
+</tr>
+<tr class="odd">
+<td>system</td>
+<td align="left">x86_64, linux-gnu</td>
+</tr>
+<tr class="even">
+<td>ui</td>
+<td align="left">X11</td>
+</tr>
+<tr class="odd">
+<td>language</td>
+<td align="left">(EN)</td>
+</tr>
+<tr class="even">
+<td>collate</td>
+<td align="left">en_US.UTF-8</td>
+</tr>
+<tr class="odd">
+<td>ctype</td>
+<td align="left">en_US.UTF-8</td>
+</tr>
+<tr class="even">
+<td>tz</td>
+<td align="left">America/New_York</td>
+</tr>
+<tr class="odd">
+<td>date</td>
+<td align="left">2020-07-08</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>as.data.frame(sessioninfo::package_info())[c(&#39;package&#39;, &#39;loadedversion&#39;, &#39;date&#39;, &#39;source&#39;)]</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">package</th>
+<th align="left">loadedversion</th>
+<th align="left">date</th>
+<th align="left">source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>acepack</td>
+<td align="left">acepack</td>
+<td align="left">1.4.1</td>
+<td align="left">2016-10-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>annotate</td>
+<td align="left">annotate</td>
+<td align="left">1.60.1</td>
+<td align="left">2019-03-07</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>AnnotationDbi</td>
+<td align="left">AnnotationDbi</td>
+<td align="left">1.44.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>assertthat</td>
+<td align="left">assertthat</td>
+<td align="left">0.2.1</td>
+<td align="left">2019-03-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>backports</td>
+<td align="left">backports</td>
+<td align="left">1.1.5</td>
+<td align="left">2019-10-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>base64enc</td>
+<td align="left">base64enc</td>
+<td align="left">0.1-3</td>
+<td align="left">2015-07-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>beeswarm</td>
+<td align="left">beeswarm</td>
+<td align="left">0.2.3</td>
+<td align="left">2016-04-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>Biobase</td>
+<td align="left">Biobase</td>
+<td align="left">2.42.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>BiocGenerics</td>
+<td align="left">BiocGenerics</td>
+<td align="left">0.28.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>BiocManager</td>
+<td align="left">BiocManager</td>
+<td align="left">1.30.10</td>
+<td align="left">2019-11-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>BiocParallel</td>
+<td align="left">BiocParallel</td>
+<td align="left">1.16.6</td>
+<td align="left">2019-02-10</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>bit</td>
+<td align="left">bit</td>
+<td align="left">1.1-15.2</td>
+<td align="left">2020-02-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>bit64</td>
+<td align="left">bit64</td>
+<td align="left">0.9-7</td>
+<td align="left">2017-05-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>bitops</td>
+<td align="left">bitops</td>
+<td align="left">1.0-6</td>
+<td align="left">2013-08-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>blob</td>
+<td align="left">blob</td>
+<td align="left">1.2.1</td>
+<td align="left">2020-01-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>brew</td>
+<td align="left">brew</td>
+<td align="left">1.0-6</td>
+<td align="left">2011-04-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Cairo</td>
+<td align="left">Cairo</td>
+<td align="left">1.5-11</td>
+<td align="left">2020-03-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>callr</td>
+<td align="left">callr</td>
+<td align="left">3.4.2</td>
+<td align="left">2020-02-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>checkmate</td>
+<td align="left">checkmate</td>
+<td align="left">2.0.0</td>
+<td align="left">2020-02-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>cli</td>
+<td align="left">cli</td>
+<td align="left">2.0.2</td>
+<td align="left">2020-02-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>cluster</td>
+<td align="left">cluster</td>
+<td align="left">2.1.0</td>
+<td align="left">2019-06-19</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>clusterProfiler</td>
+<td align="left">clusterProfiler</td>
+<td align="left">3.15.1</td>
+<td align="left">2019-11-13</td>
+<td align="left">Github (<a href="mailto:YuLab-SMU/clusterProfiler@90791b4" class="email">YuLab-SMU/clusterProfiler@90791b4</a>)</td>
+</tr>
+<tr class="odd">
+<td>colorspace</td>
+<td align="left">colorspace</td>
+<td align="left">1.4-1</td>
+<td align="left">2019-03-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>conos</td>
+<td align="left">conos</td>
+<td align="left">1.3.0</td>
+<td align="left">2020-05-12</td>
+<td align="left">local</td>
+</tr>
+<tr class="odd">
+<td>cowplot</td>
+<td align="left">cowplot</td>
+<td align="left">1.0.0</td>
+<td align="left">2019-07-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>crayon</td>
+<td align="left">crayon</td>
+<td align="left">1.3.4</td>
+<td align="left">2017-09-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>data.table</td>
+<td align="left">data.table</td>
+<td align="left">1.12.8</td>
+<td align="left">2019-12-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>dataorganizer</td>
+<td align="left">dataorganizer</td>
+<td align="left">0.1.0</td>
+<td align="left">2019-11-08</td>
+<td align="left">local</td>
+</tr>
+<tr class="odd">
+<td>DBI</td>
+<td align="left">DBI</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-12-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>DelayedArray</td>
+<td align="left">DelayedArray</td>
+<td align="left">0.8.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>dendextend</td>
+<td align="left">dendextend</td>
+<td align="left">1.13.4</td>
+<td align="left">2020-02-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>desc</td>
+<td align="left">desc</td>
+<td align="left">1.2.0</td>
+<td align="left">2018-05-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>DESeq2</td>
+<td align="left">DESeq2</td>
+<td align="left">1.22.2</td>
+<td align="left">2019-01-04</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>devtools</td>
+<td align="left">devtools</td>
+<td align="left">2.2.2</td>
+<td align="left">2020-02-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>digest</td>
+<td align="left">digest</td>
+<td align="left">0.6.25</td>
+<td align="left">2020-02-23</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>DO.db</td>
+<td align="left">DO.db</td>
+<td align="left">2.9</td>
+<td align="left">2019-01-29</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>DOSE</td>
+<td align="left">DOSE</td>
+<td align="left">3.13.1</td>
+<td align="left">2019-11-13</td>
+<td align="left">Github (<a href="mailto:YuLab-SMU/DOSE@e739f51" class="email">YuLab-SMU/DOSE@e739f51</a>)</td>
+</tr>
+<tr class="even">
+<td>dplyr</td>
+<td align="left">dplyr</td>
+<td align="left">0.8.5</td>
+<td align="left">2020-03-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>ellipsis</td>
+<td align="left">ellipsis</td>
+<td align="left">0.3.0</td>
+<td align="left">2019-09-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>EnhancedVolcano</td>
+<td align="left">EnhancedVolcano</td>
+<td align="left">1.5.4</td>
+<td align="left">2020-03-03</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>enrichplot</td>
+<td align="left">enrichplot</td>
+<td align="left">1.7.1</td>
+<td align="left">2019-11-13</td>
+<td align="left">Github (<a href="mailto:GuangchuangYu/enrichplot@2ed062e" class="email">GuangchuangYu/enrichplot@2ed062e</a>)</td>
+</tr>
+<tr class="even">
+<td>Epilepsy19</td>
+<td align="left">Epilepsy19</td>
+<td align="left">0.0.0.9000</td>
+<td align="left">2019-10-15</td>
+<td align="left">local</td>
+</tr>
+<tr class="odd">
+<td>europepmc</td>
+<td align="left">europepmc</td>
+<td align="left">0.3</td>
+<td align="left">2018-04-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>evaluate</td>
+<td align="left">evaluate</td>
+<td align="left">0.14</td>
+<td align="left">2019-05-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>fansi</td>
+<td align="left">fansi</td>
+<td align="left">0.4.1</td>
+<td align="left">2020-01-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>farver</td>
+<td align="left">farver</td>
+<td align="left">2.0.3</td>
+<td align="left">2020-01-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>fastmap</td>
+<td align="left">fastmap</td>
+<td align="left">1.0.1</td>
+<td align="left">2019-10-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>fastmatch</td>
+<td align="left">fastmatch</td>
+<td align="left">1.1-0</td>
+<td align="left">2017-01-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>fgsea</td>
+<td align="left">fgsea</td>
+<td align="left">1.8.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>foreign</td>
+<td align="left">foreign</td>
+<td align="left">0.8-76</td>
+<td align="left">2020-03-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Formula</td>
+<td align="left">Formula</td>
+<td align="left">1.2-3</td>
+<td align="left">2018-05-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>fs</td>
+<td align="left">fs</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-03-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>genefilter</td>
+<td align="left">genefilter</td>
+<td align="left">1.64.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>geneplotter</td>
+<td align="left">geneplotter</td>
+<td align="left">1.60.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>GenomeInfoDb</td>
+<td align="left">GenomeInfoDb</td>
+<td align="left">1.18.2</td>
+<td align="left">2019-02-12</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>GenomeInfoDbData</td>
+<td align="left">GenomeInfoDbData</td>
+<td align="left">1.2.0</td>
+<td align="left">2019-04-08</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>GenomicRanges</td>
+<td align="left">GenomicRanges</td>
+<td align="left">1.34.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>ggbeeswarm</td>
+<td align="left">ggbeeswarm</td>
+<td align="left">0.6.0</td>
+<td align="left">2018-10-16</td>
+<td align="left">Github (<a href="mailto:eclarke/ggbeeswarm@fb85521" class="email">eclarke/ggbeeswarm@fb85521</a>)</td>
+</tr>
+<tr class="odd">
+<td>ggforce</td>
+<td align="left">ggforce</td>
+<td align="left">0.3.1</td>
+<td align="left">2019-08-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ggplot2</td>
+<td align="left">ggplot2</td>
+<td align="left">3.3.0</td>
+<td align="left">2020-03-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>ggplotify</td>
+<td align="left">ggplotify</td>
+<td align="left">0.0.5</td>
+<td align="left">2020-03-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ggraph</td>
+<td align="left">ggraph</td>
+<td align="left">2.0.2</td>
+<td align="left">2020-03-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>ggrastr</td>
+<td align="left">ggrastr</td>
+<td align="left">0.1.7</td>
+<td align="left">2018-12-04</td>
+<td align="left">Github (<a href="mailto:VPetukhov/ggrastr@203d5cc" class="email">VPetukhov/ggrastr@203d5cc</a>)</td>
+</tr>
+<tr class="even">
+<td>ggrepel</td>
+<td align="left">ggrepel</td>
+<td align="left">0.8.2</td>
+<td align="left">2020-03-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>ggridges</td>
+<td align="left">ggridges</td>
+<td align="left">0.5.2</td>
+<td align="left">2020-01-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>git2r</td>
+<td align="left">git2r</td>
+<td align="left">0.26.1</td>
+<td align="left">2019-06-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>glue</td>
+<td align="left">glue</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-03-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>GO.db</td>
+<td align="left">GO.db</td>
+<td align="left">3.7.0</td>
+<td align="left">2019-04-19</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>GOSemSim</td>
+<td align="left">GOSemSim</td>
+<td align="left">2.8.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>graphlayouts</td>
+<td align="left">graphlayouts</td>
+<td align="left">0.6.0</td>
+<td align="left">2020-03-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>gridExtra</td>
+<td align="left">gridExtra</td>
+<td align="left">2.3</td>
+<td align="left">2017-09-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>gridGraphics</td>
+<td align="left">gridGraphics</td>
+<td align="left">0.5-0</td>
+<td align="left">2020-02-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>gtable</td>
+<td align="left">gtable</td>
+<td align="left">0.3.0</td>
+<td align="left">2019-03-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>highr</td>
+<td align="left">highr</td>
+<td align="left">0.8</td>
+<td align="left">2019-03-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Hmisc</td>
+<td align="left">Hmisc</td>
+<td align="left">4.3-1</td>
+<td align="left">2020-02-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>hms</td>
+<td align="left">hms</td>
+<td align="left">0.5.3</td>
+<td align="left">2020-01-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>htmlTable</td>
+<td align="left">htmlTable</td>
+<td align="left">1.13.3</td>
+<td align="left">2019-12-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>htmltools</td>
+<td align="left">htmltools</td>
+<td align="left">0.4.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>htmlwidgets</td>
+<td align="left">htmlwidgets</td>
+<td align="left">1.5.1</td>
+<td align="left">2019-10-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>httpuv</td>
+<td align="left">httpuv</td>
+<td align="left">1.5.2</td>
+<td align="left">2019-09-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>httr</td>
+<td align="left">httr</td>
+<td align="left">1.4.1</td>
+<td align="left">2019-08-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>igraph</td>
+<td align="left">igraph</td>
+<td align="left">1.2.4.2</td>
+<td align="left">2019-11-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>IRanges</td>
+<td align="left">IRanges</td>
+<td align="left">2.16.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>irlba</td>
+<td align="left">irlba</td>
+<td align="left">2.3.3</td>
+<td align="left">2019-02-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>jsonlite</td>
+<td align="left">jsonlite</td>
+<td align="left">1.6.1</td>
+<td align="left">2020-02-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>knitr</td>
+<td align="left">knitr</td>
+<td align="left">1.28</td>
+<td align="left">2020-02-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>labeling</td>
+<td align="left">labeling</td>
+<td align="left">0.3</td>
+<td align="left">2014-08-23</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>later</td>
+<td align="left">later</td>
+<td align="left">1.0.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>lattice</td>
+<td align="left">lattice</td>
+<td align="left">0.20-40</td>
+<td align="left">2020-02-19</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>latticeExtra</td>
+<td align="left">latticeExtra</td>
+<td align="left">0.6-28</td>
+<td align="left">2016-02-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>lifecycle</td>
+<td align="left">lifecycle</td>
+<td align="left">0.2.0</td>
+<td align="left">2020-03-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>locfit</td>
+<td align="left">locfit</td>
+<td align="left">1.5-9.1</td>
+<td align="left">2013-04-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>magrittr</td>
+<td align="left">magrittr</td>
+<td align="left">1.5</td>
+<td align="left">2014-11-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>MASS</td>
+<td align="left">MASS</td>
+<td align="left">7.3-51.5</td>
+<td align="left">2019-12-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Matrix</td>
+<td align="left">Matrix</td>
+<td align="left">1.2-18</td>
+<td align="left">2019-11-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>matrixStats</td>
+<td align="left">matrixStats</td>
+<td align="left">0.56.0</td>
+<td align="left">2020-03-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>memoise</td>
+<td align="left">memoise</td>
+<td align="left">1.1.0</td>
+<td align="left">2017-04-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>mgcv</td>
+<td align="left">mgcv</td>
+<td align="left">1.8-31</td>
+<td align="left">2019-11-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>mime</td>
+<td align="left">mime</td>
+<td align="left">0.9</td>
+<td align="left">2020-02-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>munsell</td>
+<td align="left">munsell</td>
+<td align="left">0.5.0</td>
+<td align="left">2018-06-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>nlme</td>
+<td align="left">nlme</td>
+<td align="left">3.1-145</td>
+<td align="left">2020-03-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>nnet</td>
+<td align="left">nnet</td>
+<td align="left">7.3-13</td>
+<td align="left">2020-02-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>openxlsx</td>
+<td align="left">openxlsx</td>
+<td align="left">4.1.4</td>
+<td align="left">2019-12-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>org.Hs.eg.db</td>
+<td align="left">org.Hs.eg.db</td>
+<td align="left">3.7.0</td>
+<td align="left">2019-10-08</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>pagoda2</td>
+<td align="left">pagoda2</td>
+<td align="left">0.1.1</td>
+<td align="left">2019-12-10</td>
+<td align="left">local</td>
+</tr>
+<tr class="even">
+<td>pbapply</td>
+<td align="left">pbapply</td>
+<td align="left">1.4-2</td>
+<td align="left">2019-08-31</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pheatmap</td>
+<td align="left">pheatmap</td>
+<td align="left">1.0.12</td>
+<td align="left">2019-01-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>pillar</td>
+<td align="left">pillar</td>
+<td align="left">1.4.3</td>
+<td align="left">2019-12-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pkgbuild</td>
+<td align="left">pkgbuild</td>
+<td align="left">1.0.6</td>
+<td align="left">2019-10-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>pkgconfig</td>
+<td align="left">pkgconfig</td>
+<td align="left">2.0.3</td>
+<td align="left">2019-09-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pkgload</td>
+<td align="left">pkgload</td>
+<td align="left">1.0.2</td>
+<td align="left">2018-10-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>plyr</td>
+<td align="left">plyr</td>
+<td align="left">1.8.6</td>
+<td align="left">2020-03-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>polyclip</td>
+<td align="left">polyclip</td>
+<td align="left">1.10-0</td>
+<td align="left">2019-03-14</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>prettyunits</td>
+<td align="left">prettyunits</td>
+<td align="left">1.1.1</td>
+<td align="left">2020-01-24</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>processx</td>
+<td align="left">processx</td>
+<td align="left">3.4.2</td>
+<td align="left">2020-02-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>progress</td>
+<td align="left">progress</td>
+<td align="left">1.2.2</td>
+<td align="left">2019-05-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>promises</td>
+<td align="left">promises</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ps</td>
+<td align="left">ps</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-02-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>purrr</td>
+<td align="left">purrr</td>
+<td align="left">0.3.3</td>
+<td align="left">2019-10-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>qvalue</td>
+<td align="left">qvalue</td>
+<td align="left">2.14.1</td>
+<td align="left">2019-01-10</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>R6</td>
+<td align="left">R6</td>
+<td align="left">2.4.1</td>
+<td align="left">2019-11-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>RColorBrewer</td>
+<td align="left">RColorBrewer</td>
+<td align="left">1.1-2</td>
+<td align="left">2014-12-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Rcpp</td>
+<td align="left">Rcpp</td>
+<td align="left">1.0.4</td>
+<td align="left">2020-03-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>RCurl</td>
+<td align="left">RCurl</td>
+<td align="left">1.98-1.1</td>
+<td align="left">2020-01-19</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>readr</td>
+<td align="left">readr</td>
+<td align="left">1.3.1</td>
+<td align="left">2018-12-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>remotes</td>
+<td align="left">remotes</td>
+<td align="left">2.1.1</td>
+<td align="left">2020-02-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>reshape2</td>
+<td align="left">reshape2</td>
+<td align="left">1.4.3</td>
+<td align="left">2017-12-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rjson</td>
+<td align="left">rjson</td>
+<td align="left">0.2.20</td>
+<td align="left">2018-06-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>rlang</td>
+<td align="left">rlang</td>
+<td align="left">0.4.5</td>
+<td align="left">2020-03-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rmarkdown</td>
+<td align="left">rmarkdown</td>
+<td align="left">2.1</td>
+<td align="left">2020-01-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Rook</td>
+<td align="left">Rook</td>
+<td align="left">1.1-1</td>
+<td align="left">2014-10-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rpart</td>
+<td align="left">rpart</td>
+<td align="left">4.1-15</td>
+<td align="left">2019-04-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>rprojroot</td>
+<td align="left">rprojroot</td>
+<td align="left">1.3-2</td>
+<td align="left">2018-01-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>RSpectra</td>
+<td align="left">RSpectra</td>
+<td align="left">0.16-0</td>
+<td align="left">2019-12-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>RSQLite</td>
+<td align="left">RSQLite</td>
+<td align="left">2.2.0</td>
+<td align="left">2020-01-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rstudioapi</td>
+<td align="left">rstudioapi</td>
+<td align="left">0.11</td>
+<td align="left">2020-02-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>rvcheck</td>
+<td align="left">rvcheck</td>
+<td align="left">0.1.8</td>
+<td align="left">2020-03-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>S4Vectors</td>
+<td align="left">S4Vectors</td>
+<td align="left">0.20.1</td>
+<td align="left">2018-11-09</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>scales</td>
+<td align="left">scales</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-11-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>scatterpie</td>
+<td align="left">scatterpie</td>
+<td align="left">0.1.4</td>
+<td align="left">2019-11-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>sccore</td>
+<td align="left">sccore</td>
+<td align="left">0.1</td>
+<td align="left">2020-04-24</td>
+<td align="left">Github (<a href="mailto:hms-dbmi/sccore@2b34b61" class="email">hms-dbmi/sccore@2b34b61</a>)</td>
+</tr>
+<tr class="even">
+<td>sessioninfo</td>
+<td align="left">sessioninfo</td>
+<td align="left">1.1.1</td>
+<td align="left">2018-11-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>shiny</td>
+<td align="left">shiny</td>
+<td align="left">1.4.0.2</td>
+<td align="left">2020-03-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>stringi</td>
+<td align="left">stringi</td>
+<td align="left">1.4.6</td>
+<td align="left">2020-02-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>stringr</td>
+<td align="left">stringr</td>
+<td align="left">1.4.0</td>
+<td align="left">2019-02-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>SummarizedExperiment</td>
+<td align="left">SummarizedExperiment</td>
+<td align="left">1.12.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>survival</td>
+<td align="left">survival</td>
+<td align="left">3.1-11</td>
+<td align="left">2020-03-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>testthat</td>
+<td align="left">testthat</td>
+<td align="left">2.3.2</td>
+<td align="left">2020-03-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>tibble</td>
+<td align="left">tibble</td>
+<td align="left">2.1.3</td>
+<td align="left">2019-06-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>tidygraph</td>
+<td align="left">tidygraph</td>
+<td align="left">1.1.2</td>
+<td align="left">2019-02-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>tidyr</td>
+<td align="left">tidyr</td>
+<td align="left">1.0.2</td>
+<td align="left">2020-01-24</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>tidyselect</td>
+<td align="left">tidyselect</td>
+<td align="left">1.0.0</td>
+<td align="left">2020-01-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>triebeard</td>
+<td align="left">triebeard</td>
+<td align="left">0.3.0</td>
+<td align="left">2016-08-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>tweenr</td>
+<td align="left">tweenr</td>
+<td align="left">1.0.1</td>
+<td align="left">2018-12-14</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>urltools</td>
+<td align="left">urltools</td>
+<td align="left">1.7.3</td>
+<td align="left">2019-04-14</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>usethis</td>
+<td align="left">usethis</td>
+<td align="left">1.5.1</td>
+<td align="left">2019-07-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>uwot</td>
+<td align="left">uwot</td>
+<td align="left">0.1.8</td>
+<td align="left">2020-03-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>vctrs</td>
+<td align="left">vctrs</td>
+<td align="left">0.2.4</td>
+<td align="left">2020-03-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>vipor</td>
+<td align="left">vipor</td>
+<td align="left">0.4.5</td>
+<td align="left">2017-03-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>viridis</td>
+<td align="left">viridis</td>
+<td align="left">0.5.1</td>
+<td align="left">2018-03-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>viridisLite</td>
+<td align="left">viridisLite</td>
+<td align="left">0.3.0</td>
+<td align="left">2018-02-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>whisker</td>
+<td align="left">whisker</td>
+<td align="left">0.4</td>
+<td align="left">2019-08-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>withr</td>
+<td align="left">withr</td>
+<td align="left">2.1.2</td>
+<td align="left">2018-03-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>workflowr</td>
+<td align="left">workflowr</td>
+<td align="left">1.6.1</td>
+<td align="left">2020-03-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>xfun</td>
+<td align="left">xfun</td>
+<td align="left">0.12</td>
+<td align="left">2020-01-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>XML</td>
+<td align="left">XML</td>
+<td align="left">3.99-0.3</td>
+<td align="left">2020-01-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>xml2</td>
+<td align="left">xml2</td>
+<td align="left">1.2.5</td>
+<td align="left">2020-03-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>xtable</td>
+<td align="left">xtable</td>
+<td align="left">1.8-4</td>
+<td align="left">2019-04-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>XVector</td>
+<td align="left">XVector</td>
+<td align="left">0.22.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>yaml</td>
+<td align="left">yaml</td>
+<td align="left">2.2.1</td>
+<td align="left">2020-02-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>zip</td>
+<td align="left">zip</td>
+<td align="left">2.0.4</td>
+<td align="left">2019-09-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>zlibbioc</td>
+<td align="left">zlibbioc</td>
+<td align="left">1.28.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

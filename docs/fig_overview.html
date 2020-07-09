@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Overview of all datasets</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Epilepsy19</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Overview of all datasets</h1>
+<h4 class="date">08 July, 2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-07-08
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>Epilepsy19/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.1). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200706code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200706)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200706code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200706)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomkhodosevichlabEpilepsy19tree856ddcff5cd9f1487723863d439ab3088ac998bftargetblank856ddcfa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/khodosevichlab/Epilepsy19/tree/856ddcff5cd9f1487723863d439ab3088ac998bf" target="_blank">856ddcf</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomkhodosevichlabEpilepsy19tree856ddcff5cd9f1487723863d439ab3088ac998bftargetblank856ddcfa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/khodosevichlab/Epilepsy19/tree/856ddcff5cd9f1487723863d439ab3088ac998bf" target="_blank">856ddcf</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/fig_go.nb.html
+    Ignored:    analysis/fig_neun.nb.html
+    Ignored:    analysis/fig_overview.nb.html
+    Ignored:    analysis/fig_smart_seq.nb.html
+    Ignored:    analysis/fig_summary.nb.html
+    Ignored:    analysis/fig_type_distance.nb.html
+    Ignored:    analysis/gene_testing.nb.html
+    Ignored:    analysis/prep_alignment.nb.html
+    Ignored:    cache/con_allen.rds
+    Ignored:    cache/con_filt_cells.rds
+    Ignored:    cache/con_filt_samples.rds
+    Ignored:    cache/con_ss.rds
+    Ignored:    cache/count_matrices.rds
+    Ignored:    cache/p2s/
+    Ignored:    output/
+
+Untracked files:
+    Untracked:  DESCRIPTION
+    Untracked:  NAMESPACE
+    Untracked:  R/
+    Untracked:  analysis/prep_alignment.Rmd
+    Untracked:  analysis/prep_filtration.Rmd
+    Untracked:  code/
+    Untracked:  gene_modules/
+    Untracked:  man/
+    Untracked:  metadata/
+
+Unstaged changes:
+    Modified:   Epilepsy19.Rproj
+    Modified:   README.md
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/fig_overview.Rmd</code>) and HTML (<code>docs/fig_overview.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/khodosevichlab/Epilepsy19/blob/964ac2053ef78e275969954b741a3b25142bbad0/analysis/fig_overview.Rmd" target="_blank">964ac20</a>
+</td>
+<td>
+viktor_petukhov
+</td>
+<td>
+2020-07-06
+</td>
+<td>
+Overview notebook
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code># library(Epilepsy19)
+library(ggplot2)
+library(magrittr)
+library(Matrix)
+library(pbapply)
+library(conos)
+library(CellAnnotatoR)
+library(readr)
+library(tidyverse)
+library(pheatmap)
+
+theme_set(theme_bw())
+
+devtools::load_all()
+
+outPath &lt;- function(...) OutputPath(&quot;overview&quot;, ...)
+theme_borders &lt;- theme(panel.border=element_blank(), axis.line=element_line(size=0.5, color = &quot;black&quot;))</code></pre>
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<pre class="r"><code>con &lt;- read_rds(CachePath(&quot;con_filt_cells.rds&quot;))
+
+sample_info &lt;- MetadataPath(&quot;sample_info.csv&quot;) %&gt;% read_csv()
+sex_per_sample &lt;- sample_info %$% setNames(Sex, Alias)</code></pre>
+<pre class="r"><code>cm_per_samp_raw &lt;- lapply(con$samples, function(p2) p2$misc$rawCounts)
+cm_per_samp_raw$NeuNNeg &lt;- CachePath(&quot;count_matrices.rds&quot;) %&gt;% read_rds() %&gt;% .$NeuN %&gt;% t()
+
+med_umis_per_samp &lt;- pblapply(cm_per_samp_raw, Matrix::rowSums) %&gt;% sapply(median)
+med_genes_per_samp &lt;- pblapply(cm_per_samp_raw, getNGenes) %&gt;% sapply(median)
+n_cells_per_samp &lt;- sapply(cm_per_samp_raw, nrow)
+
+mean(med_genes_per_samp)</code></pre>
+<pre><code>[1] 2304.25</code></pre>
+<pre class="r"><code>cm_merged &lt;- con$getJointCountMatrix()
+
+sample_per_cell &lt;- con$getDatasetPerCell()
+condition_per_sample &lt;- ifelse(grepl(&quot;E&quot;, levels(sample_per_cell)), &quot;epilepsy&quot;, &quot;control&quot;) %&gt;% 
+  setNames(levels(sample_per_cell))
+
+annotation_by_level &lt;- read_csv(MetadataPath(&quot;annotation.csv&quot;)) %&gt;% 
+  filter(cell %in% rownames(cm_merged))
+
+annotation_by_level %&lt;&gt;% .[, 2:ncol(.)] %&gt;% lapply(setNames, annotation_by_level$cell)
+annotation &lt;- as.factor(annotation_by_level$l4)
+
+neuron_type_per_type &lt;- ifelse(grepl(&quot;L[2-6].+&quot;, unique(annotation)), &quot;Excitatory&quot;, &quot;Inhibitory&quot;) %&gt;% 
+  setNames(unique(annotation))
+
+samp_per_cond &lt;- sample_info$Alias %&gt;% split(condition_per_sample[.])
+
+type_order &lt;- names(neuron_type_per_type)[order(neuron_type_per_type, names(neuron_type_per_type))]
+annotation &lt;- factor(annotation, levels=type_order)
+
+condition_colors &lt;- c(&quot;#0571b0&quot;, &quot;#ca0020&quot;)</code></pre>
+</div>
+<div id="annotation-hierarchy" class="section level2">
+<h2>Annotation hierarchy</h2>
+<pre class="r"><code>parseMarkerFile(MetadataPath(&quot;neuron_markers.txt&quot;)) %&gt;% 
+  createClassificationTree() %&gt;% plotTypeHierarchy()</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;cell_type_hierarchy.pdf&quot;))</code></pre>
+</div>
+<div id="joint-embedding" class="section level2">
+<h2>Joint embedding</h2>
+<div id="annotation" class="section level3">
+<h3>Annotation</h3>
+<pre class="r"><code>gg_annot &lt;- con$plotGraph(groups=annotation, shuffle.colors=T, font.size=c(2, 3), 
+                             size=0.1, alpha=0.05, raster=T, raster.dpi=120) +
+  theme(panel.grid=element_blank())
+
+gg_annot</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;annotation_large.pdf&quot;))</code></pre>
+<pre class="r"><code>ggs &lt;- plotAnnotationByLevels(con$embedding, annotation_by_level, size=0.1, font.size=c(2, 3), shuffle.colors=T,
+                       raster=T, raster.dpi=120, raster.width=4, raster.height=4, build.panel=F) %&gt;% 
+  lapply(`+`, theme(plot.title=element_blank(), plot.margin=margin()))
+
+cowplot::plot_grid(plotlist=ggs, ncol=2)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-7-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;hierarchical_annotation.pdf&quot;), cowplot::plot_grid(plotlist=ggs, ncol=1), width=4, height=16)</code></pre>
+<pre class="r"><code>gg_ind_anns &lt;- lapply(samp_per_cond, function(ns)
+  conos:::plotSamples(con$samples[ns] %&gt;% setNames(gsub(&quot;C&quot;, &quot;control &quot;, gsub(&quot;E&quot;, &quot;epilepsy &quot;, names(.)))), 
+                      groups=annotation, embedding.type=&quot;UMAP&quot;, ncol=2, size=0.1, adj.list=list(theme(plot.margin=margin())),
+                      font.size=c(1.5, 2.5), raster=T, raster.dpi=120, raster.width=4, raster.height=3))
+
+ggsave(outPath(&quot;individual_annotation_cnt.pdf&quot;), gg_ind_anns$control, width=8, height=15)
+ggsave(outPath(&quot;individual_annotation_ep.pdf&quot;), gg_ind_anns$epilepsy, width=8, height=15)
+
+gg_ind_anns</code></pre>
+<pre><code>$control</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre><code>
+$epilepsy</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-8-2.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="groups" class="section level3">
+<h3>Groups</h3>
+<p>Condition:</p>
+<pre class="r"><code>condition_per_cell &lt;- condition_per_sample[as.character(con$getDatasetPerCell())] %&gt;% 
+  setNames(names(sample_per_cell))
+con$plotGraph(groups=condition_per_cell, mark.groups=F, size=0.05, alpha=0.05, show.legend=T, 
+                 legend.pos=c(1,1), raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+  gg_annot$layers[[2]] +
+  scale_size_continuous(range=c(2, 3), trans=&#39;identity&#39;, guide=&#39;none&#39;) +
+  scale_color_manual(values=condition_colors) +
+  guides(color=guide_legend(override.aes=list(size=2, alpha=1), title=&quot;Condition&quot;)) +
+  theme(panel.grid=element_blank())</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;condition_per_cell.pdf&quot;))</code></pre>
+<p><del>Age:</del></p>
+<p><del>Age information was hidden for the data security purposes</del></p>
+<pre class="r"><code>age_per_cell &lt;- age_per_sample[sample_per_cell] %&gt;% setNames(names(sample_per_cell))
+age_subsets &lt;- age_per_cell %&gt;% split(condition_per_cell[names(.)]) %&gt;% c(list(all=age_per_cell))
+ggs_age &lt;- lapply(names(age_subsets), function(n) {
+  t.g &lt;- con$plotGraph(colors=age_subsets[[n]], color.range=range(age_per_cell), size=0.05, 
+                          alpha=0.1, plot.na=F, show.legend=T, legend.pos=c(1,1), 
+                          raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+    gg_annot$layers[[2]] +
+    scale_size_continuous(range=c(2, 3), trans=&#39;identity&#39;, guide=&#39;none&#39;) +
+    scale_color_distiller(&quot;Age&quot;, palette=&quot;RdYlBu&quot;) +
+    theme(panel.grid=element_blank())
+  ggsave(outPath(paste0(&quot;age_&quot;, n, &quot;.pdf&quot;)), t.g)
+  t.g
+})
+
+ggs_age</code></pre>
+<p>Sex:</p>
+<pre class="r"><code>sex_per_cell &lt;- sex_per_sample[sample_per_cell] %&gt;% setNames(names(sample_per_cell))
+sex_subsets &lt;- sex_per_cell %&gt;% split(condition_per_cell[names(.)]) %&gt;% c(list(all=sex_per_cell))
+ggs_sex &lt;- lapply(names(sex_subsets), function(n) {
+  t.g &lt;- con$plotGraph(groups=sex_subsets[[n]], size=0.05, alpha=0.05, plot.na=F, 
+                          mark.groups=F, show.legend=T, legend.pos=c(1,1), 
+                          raster=T, raster.dpi=150, raster.width=7, raster.height=7) +
+    gg_annot$layers[[2]] +
+    scale_size_continuous(range=c(2, 3), trans=&#39;identity&#39;, guide=&#39;none&#39;) +
+    scale_color_manual(values=c(&quot;#7b3294&quot;, &quot;#008837&quot;)) +
+    guides(color=guide_legend(override.aes=list(size=2, alpha=1), title=&quot;Sex&quot;)) +
+    theme(panel.grid=element_blank())
+  ggsave(outPath(paste0(&quot;sex_&quot;, n, &quot;.pdf&quot;)), t.g)
+  t.g
+})
+
+
+ggs_sex</code></pre>
+<pre><code>[[1]]</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[2]]</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>
+[[3]]</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-11-3.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="cell-type-presence" class="section level2">
+<h2>Cell type presence</h2>
+<pre class="r"><code>con$getDatasetPerCell() %&gt;% table(annotation[names(.)]) %&gt;% as.matrix() %&gt;% 
+  `/`(rowSums(.)) %&gt;% `*`(100) %&gt;% round(2) %&gt;% as.data.frame.matrix() %&gt;% 
+  as_tibble(rownames=&quot;Sample&quot;) %&gt;% mutate(Sample=factor(Sample, levels=sample_info$Alias)) %&gt;% 
+  arrange(Sample) %&gt;% write_csv(outPath(&quot;cell_type_presence_by_sample.csv&quot;))</code></pre>
+<pre class="r"><code>sample_per_cell &lt;- con$getDatasetPerCell() %&gt;% factor(levels=unlist(samp_per_cond))
+sf_per_cond &lt;- unique(condition_per_sample) %&gt;% setNames(., .) %&gt;% lapply(function(n)
+  sample_per_cell[condition_per_sample[as.character(sample_per_cell)] == n])
+
+gg_type_persence &lt;- lapply(sf_per_cond, function(sf)
+  plotClusterBarplots(groups=annotation, sample.factor=sf, show.entropy=F, show.size=F) +
+    labs(x=&quot;&quot;, y=&quot;Fraction of cells&quot;) + scale_y_continuous(expand=c(0, 0)) +
+    theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.key.height=unit(12, &quot;pt&quot;)) +
+    scale_fill_manual(values=sample(RColorBrewer::brewer.pal(length(levels(sf)), &quot;Paired&quot;)))
+)
+
+cowplot::plot_grid(plotlist=gg_type_persence, ncol=1, labels=c(&quot;Control&quot;, &quot;Epilepsy&quot;), label_x=0.04, label_y=0.98)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;cell_type_presence_by_sample.pdf&quot;))</code></pre>
+<pre class="r"><code>p_df &lt;- table(Sample=sample_per_cell) %&gt;% as.data.frame() %&gt;% 
+  mutate(Condition=condition_per_sample[as.character(Sample)])
+
+ggplot(p_df) +
+  geom_bar(aes(x=Sample, y=Freq, fill=Condition), stat=&quot;identity&quot;) +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  scale_y_continuous(expand=expand_scale(c(0, 0.05))) +
+  labs(x=&quot;&quot;, y=&quot;Number of cells&quot;) +
+  theme(legend.position=&quot;none&quot;, panel.grid.major.x=element_blank()) +
+  theme_borders</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_cells_per_sample.pdf&quot;))</code></pre>
+<pre class="r"><code>expected_frac_per_type &lt;- table(annotation[names(sample_per_cell[grep(&quot;C&quot;, sample_per_cell)])]) %&gt;% `/`(sum(.)) %&gt;% 
+  as.matrix() %&gt;% .[,1]
+
+has_low_frac &lt;- table(sample_per_cell, annotation[names(sample_per_cell)]) %&gt;% as.matrix() %&gt;% 
+  `/`(rowSums(.)) %&gt;% t() %&gt;% `&lt;`(expected_frac_per_type * 0.1)
+
+colSums(has_low_frac)</code></pre>
+<pre><code> C1  C2  C3  C4  C5  C6  C7  C8  C9 C10  E1  E2  E3  E4  E5  E6  E7  E8  E9 
+  0   1   0   0   4   0   0   5   0   0   0   0   0   0   8   0   0   0   0 </code></pre>
+<pre class="r"><code>rowMeans(has_low_frac)</code></pre>
+<pre><code>        L2_3_Cux2_Frem3           L2_Cux2_Lamp5          L3_Cux2_Prss12 
+             0.00000000              0.00000000              0.00000000 
+       L4_Rorb_Arhgap15             L4_Rorb_Met             L4_Rorb_Mme 
+             0.05263158              0.00000000              0.00000000 
+  L5_6_Fezf2_Lrrk1_Pcp4 L5_6_Fezf2_Lrrk1_Sema3e     L5_6_Fezf2_Tle4_Abo 
+             0.00000000              0.00000000              0.00000000 
+  L5_6_Fezf2_Tle4_Htr2c  L5_6_Fezf2_Tle4_Scube1       L5_6_Themis_Ntng2 
+             0.00000000              0.00000000              0.00000000 
+     L5_6_Themis_Sema3a           Id2_Lamp5_Crh          Id2_Lamp5_Nmbr 
+             0.00000000              0.00000000              0.00000000 
+         Id2_Lamp5_Nos1              Id2_Nckap5                Id2_Pax6 
+             0.00000000              0.00000000              0.00000000 
+              Pvalb_Crh              Pvalb_Lgr5              Pvalb_Nos1 
+             0.10526316              0.15789474              0.00000000 
+            Pvalb_Sulf1               Sst_Calb1               Sst_Isoc1 
+             0.00000000              0.00000000              0.10526316 
+               Sst_Nos1              Sst_Stk32a                Sst_Tac1 
+             0.00000000              0.00000000              0.05263158 
+               Sst_Tac3                  Sst_Th              Vip_Abi3bp 
+             0.00000000              0.10526316              0.10526316 
+              Vip_Cbln1                 Vip_Crh                Vip_Nrg1 
+             0.00000000              0.10526316              0.05263158 
+             Vip_Sema3c               Vip_Sstr1                 Vip_Tyr 
+             0.00000000              0.05263158              0.05263158 </code></pre>
+<pre class="r"><code>has_few_cells &lt;- table(sample_per_cell, annotation[names(sample_per_cell)]) %&gt;% `&lt;`(5)
+p_df &lt;- rowSums(has_few_cells) %&gt;% as_tibble(rownames=&quot;Sample&quot;) %&gt;%
+  mutate(Condition=condition_per_sample[as.character(Sample)], 
+         Sample=factor(Sample, levels=levels(sample_per_cell)))
+
+ggplot(p_df) +
+  geom_bar(aes(x=Sample, y=value, fill=Condition), stat=&quot;identity&quot;) +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  scale_y_continuous(expand=expansion(c(0, 0.05))) +
+  labs(x=&quot;&quot;, y=&quot;Number of subtypes with &lt;5 nuclei&quot;) +
+  theme(legend.position=&quot;none&quot;, panel.grid.major.x=element_blank()) +
+  theme_borders</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-16-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_missed_types_per_sample.pdf&quot;))</code></pre>
+<pre class="r"><code>p_df &lt;- (1 - colMeans(has_few_cells)) %&gt;% as_tibble(rownames=&quot;Type&quot;) %&gt;%
+  mutate(NeuronType=neuron_type_per_type[as.character(Type)], Type=factor(Type, levels=type_order))
+ggplot(p_df) +
+  geom_bar(aes(x=Type, y=value, fill=NeuronType), stat=&quot;identity&quot;) +
+  geom_hline(aes(yintercept=0.9)) +
+  scale_fill_brewer(palette=&quot;Set2&quot;) +
+  scale_y_continuous(expand=expansion(c(0, 0))) +
+  labs(x=&quot;&quot;, y=&quot;Fraction of samples\n with &gt;= 5 nuclei&quot;) +
+  theme(legend.position=&quot;none&quot;, panel.grid.major.x=element_blank(), 
+        axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-17-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;presence_frac_per_type_before_filt.pdf&quot;))</code></pre>
+<pre class="r"><code>p_df &lt;- (1 - colMeans(has_few_cells[!(rownames(has_few_cells) %in% c(&quot;C3&quot;, &quot;C5&quot;, &quot;E5&quot;)),])) %&gt;% 
+  as_tibble(rownames=&quot;Type&quot;) %&gt;%
+  mutate(NeuronType=neuron_type_per_type[as.character(Type)], Type=factor(Type, levels=type_order))
+ggplot(p_df) +
+  geom_bar(aes(x=Type, y=value, fill=NeuronType), stat=&quot;identity&quot;) +
+  geom_hline(aes(yintercept=0.9)) +
+  scale_fill_brewer(palette=&quot;Set2&quot;) +
+  scale_y_continuous(expand=expansion(c(0, 0))) +
+  labs(x=&quot;&quot;, y=&quot;Fraction of samples\n with &gt;= 5 nuclei&quot;) +
+  theme(legend.position=&quot;none&quot;, panel.grid.major.x=element_blank(), 
+        axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-18-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;presence_frac_per_type_after_filt.pdf&quot;))</code></pre>
+<pre class="r"><code>n_genes_per_sample &lt;- names(con$samples) %&gt;% setNames(., .) %&gt;% 
+  pblapply(function(n) tibble(Sample=n, NGenes=getNGenes(con$samples[[n]]$misc$rawCounts))) %&gt;% 
+  Reduce(rbind, .) %&gt;% mutate(Condition=condition_per_sample[Sample]) %&gt;% 
+  mutate(Sample=factor(Sample, levels=levels(sample_per_cell)))</code></pre>
+<pre class="r"><code>ggplot(n_genes_per_sample) +
+  geom_boxplot(aes(x=Sample, y=NGenes, fill=Condition)) +
+  scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+  labs(x=&quot;&quot;, y=&quot;Number of genes/nucleus&quot;) +
+  theme(legend.position=&quot;none&quot;, panel.grid.major.x=element_blank()) +
+  theme_borders</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-20-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_genes_per_sample.pdf&quot;))</code></pre>
+<pre class="r"><code>n_cells_per_type &lt;- annotation %&gt;% split(condition_per_cell[names(.)]) %&gt;% lapply(table)
+n_cells_per_type &lt;- names(n_cells_per_type) %&gt;% setNames(., .) %&gt;% lapply(function(n) 
+  n_cells_per_type[[n]] %&gt;% tibble(N=., Type=names(.), Condition=n)) %&gt;% 
+  Reduce(rbind, .) %&gt;% mutate(N=as.integer(N), NeuronType=neuron_type_per_type[Type]) %&gt;% 
+  split(.$NeuronType)
+
+ggs &lt;- lapply(n_cells_per_type, function(df)
+  ggplot(df) +
+    geom_bar(aes(x=Type, y=N, fill=Condition, group=Condition), stat=&quot;identity&quot;, position=&quot;dodge&quot;) +
+    scale_fill_manual(values=alpha(condition_colors, 0.75)) +
+    scale_y_continuous(expand=expand_scale(c(0, 0.05))) +
+    labs(x=&quot;&quot;, y=&quot;&quot;) +
+    theme(legend.position=c(1, 1.05), legend.justification=c(1, 1), panel.grid.major.x=element_blank(), 
+          axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.title=element_blank(),
+          legend.background=element_blank(), plot.margin=margin()) +
+    theme_borders
+)
+
+ggs[[1]] %&lt;&gt;% `+`(scale_y_continuous(expand=expansion(c(0, 0.05)), name=&quot;Number of nuclei&quot;, breaks=c(4000, 8000, 12000)))
+cowplot::plot_grid(plotlist=ggs, nrow=1, rel_widths=c(1, 1.5), align=&quot;h&quot;)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-21-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;n_cells_per_type.pdf&quot;))</code></pre>
+</div>
+<div id="markers" class="section level2">
+<h2>Markers</h2>
+<div id="heatmaps" class="section level3">
+<h3>Heatmaps</h3>
+<pre class="r"><code>ex_markers &lt;- c(
+  # &quot;Slc17a7&quot;, 
+  &quot;Cux2&quot;, &quot;Rorb&quot;, &quot;Themis&quot;, &quot;Fezf2&quot;, &quot;Pdgfd&quot;, &quot;Lamp5&quot;, &quot;March1&quot;, &quot;Frem3&quot;, &quot;Unc5d&quot;, 
+  &quot;Lama2&quot;, &quot;Prss12&quot;, &quot;Col5a2&quot;, &quot;Dcc&quot;, &quot;Schlap1&quot;, &quot;Tox&quot;, &quot;Cobll1&quot;, &quot;Inpp4b&quot;, &quot;Mme&quot;, &quot;Plch1&quot;, 
+  &quot;Met&quot;, &quot;Gabrg1&quot;, &quot;Arhgap15&quot;, &quot;Grik3&quot;, &quot;Ntng2&quot;, &quot;Nr4a2&quot;, &quot;Dcstamp&quot;, &quot;Sema3a&quot;, &quot;Lrrk1&quot;, 
+  &quot;Tle4&quot;, &quot;Arsj&quot;, &quot;Pcp4&quot;, &quot;Tll1&quot;, &quot;Sema3e&quot;, &quot;Slit3&quot;, &quot;Abo&quot;, &quot;Sema5a&quot;, &quot;Grin3a&quot;, &quot;Htr2c&quot;, &quot;Il26&quot;, &quot;Card11&quot;, 
+  &quot;Kcnip1&quot;, &quot;Scube1&quot;, &quot;Slc15a5&quot;
+) %&gt;% toupper()
+
+c_types &lt;- c(
+  &quot;L2_Cux2_Lamp5&quot;, &quot;L2_3_Cux2_Frem3&quot;, &quot;L3_Cux2_Prss12&quot;, 
+  &quot;L4_Rorb_Mme&quot;, &quot;L4_Rorb_Met&quot;, &quot;L4_Rorb_Arhgap15&quot;,
+  &quot;L5_6_Themis_Ntng2&quot;, &quot;L5_6_Themis_Sema3a&quot;, 
+  &quot;L5_6_Fezf2_Lrrk1_Pcp4&quot;, &quot;L5_6_Fezf2_Lrrk1_Sema3e&quot;,
+  &quot;L5_6_Fezf2_Tle4_Abo&quot;, &quot;L5_6_Fezf2_Tle4_Htr2c&quot;, &quot;L5_6_Fezf2_Tle4_Scube1&quot;
+)
+ex_annotation &lt;- annotation %&gt;% .[. %in% c_types] %&gt;% factor(levels=c_types)
+
+gg_ex_heatmap_all &lt;- estimateFoldChanges(cm_merged, ex_markers, ex_annotation) %&gt;% pmax(0) %&gt;% 
+  plotGGHeatmap(legend.title=&quot;log2 fold-change&quot;) + scale_fill_distiller(palette=&quot;RdYlBu&quot;)
+
+c_types &lt;- c(&quot;L2_3_Cux2&quot;, &quot;L4_Rorb&quot;, &quot;L5_6_Themis&quot;, &quot;L5_6_Fezf2&quot;)
+ex_annotation &lt;- annotation_by_level$l2 %&gt;% .[. %in% c_types] %&gt;% factor(levels=c_types)
+
+gg_ex_heatmap &lt;- estimateFoldChanges(cm_merged, ex_markers, ex_annotation) %&gt;% pmax(0) %&gt;% 
+  plotGGHeatmap(legend.title=&quot;log2 fold-change&quot;) + scale_fill_distiller(palette=&quot;RdYlBu&quot;)
+
+ggsave(outPath(&quot;ex_markers_heatmap.pdf&quot;), gg_ex_heatmap_all, width=4.5, height=8)
+ggsave(outPath(&quot;ex_markers_heatmap_sum.pdf&quot;), gg_ex_heatmap, width=2.5, height=8)
+
+gg_ex_heatmap_all</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-22-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>gg_ex_heatmap</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-22-2.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>inh_markers &lt;- c(
+  # &quot;Gad1&quot;, &quot;Gad2&quot;, 
+  &quot;Lhx6&quot;, &quot;Sox6&quot;, &quot;Adarb2&quot;, &quot;Nr2f2&quot;, &quot;Pvalb&quot;, &quot;Sst&quot;, &quot;Vip&quot;, &quot;Id2&quot;, &quot;Crh&quot;, 
+  &quot;Nog&quot;, &quot;Lgr5&quot;, &quot;Mepe&quot;, &quot;Sulf1&quot;, &quot;Nos1&quot;, &quot;Isoc1&quot;, &quot;Calb1&quot;, &quot;Hpgd&quot;, &quot;Gxylt2&quot;, &quot;Stk32a&quot;, &quot;Reln&quot;, 
+  &quot;Tac1&quot;, &quot;Tac3&quot;, &quot;Th&quot;, &quot;Trhde&quot;, &quot;Calb2&quot;, &quot;Cck&quot;, &quot;Abi3bp&quot;, &quot;Hs3st3a1&quot;, &quot;Cbln1&quot;, &quot;Htr2c&quot;, &quot;Oprm1&quot;, 
+  &quot;Nrg1&quot;, &quot;Sema3c&quot;, &quot;Dach2&quot;, &quot;Sstr1&quot;, &quot;Tyr&quot;, &quot;Lamp5&quot;, &quot;Lcp2&quot;, &quot;Nmbr&quot;, &quot;Lhx6&quot;, &quot;Nckap5&quot;, &quot;Pax6&quot;
+) %&gt;% toupper() %&gt;% unique()
+
+c_types &lt;- c(&quot;Pvalb&quot;, &quot;Sst&quot;, &quot;Vip&quot;, &quot;Id2&quot;)
+t_ann &lt;- annotation_by_level$l2 %&gt;% .[. %in% c_types] %&gt;% factor(levels=c_types)
+
+gg_inh_heatmap &lt;- estimateFoldChanges(cm_merged, inh_markers, t_ann) %&gt;% pmax(0) %&gt;% 
+  plotGGHeatmap(legend.title=&quot;log2 fold-change&quot;) + scale_fill_distiller(palette=&quot;RdYlBu&quot;)
+
+c_types &lt;- c(&#39;Pvalb_Crh&#39;, &#39;Pvalb_Lgr5&#39;, &#39;Pvalb_Nos1&#39;, &#39;Pvalb_Sulf1&#39;,
+             &#39;Sst_Calb1&#39;, &#39;Sst_Isoc1&#39;, &#39;Sst_Nos1&#39;, &#39;Sst_Stk32a&#39;, &#39;Sst_Tac1&#39;, &#39;Sst_Tac3&#39;, &#39;Sst_Th&#39;,
+             &#39;Vip_Abi3bp&#39;, &#39;Vip_Cbln1&#39;, &#39;Vip_Crh&#39;, &#39;Vip_Nrg1&#39;, &#39;Vip_Sema3c&#39;, &#39;Vip_Sstr1&#39;, &#39;Vip_Tyr&#39;,
+             &#39;Id2_Lamp5_Crh&#39;, &#39;Id2_Lamp5_Nmbr&#39;, &#39;Id2_Lamp5_Nos1&#39;, &#39;Id2_Nckap5&#39;, &#39;Id2_Pax6&#39;)
+t_ann &lt;- annotation %&gt;% .[. %in% c_types] %&gt;% factor(levels=c_types)
+
+gg_inh_heatmap_all &lt;- estimateFoldChanges(cm_merged, inh_markers, t_ann) %&gt;% pmax(0) %&gt;% 
+  plotGGHeatmap(legend.title=&quot;log2 fold-change&quot;) + scale_fill_distiller(palette=&quot;RdYlBu&quot;)
+
+ggsave(outPath(&quot;inh_markers_heatmap.pdf&quot;), gg_inh_heatmap_all, width=5, height=8)
+ggsave(outPath(&quot;inh_markers_heatmap_sum.pdf&quot;), gg_inh_heatmap, width=2.5, height=8)
+
+gg_inh_heatmap</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>gg_inh_heatmap_all</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-23-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="embeddings" class="section level3">
+<h3>Embeddings</h3>
+<pre class="r"><code>p_genes &lt;- c(&quot;Slc17a7&quot;, &quot;Gad1&quot;, &quot;Gad2&quot;, &quot;Cux2&quot;, &quot;Rorb&quot;, &quot;Themis&quot;, &quot;Fezf2&quot;, &quot;Pvalb&quot;, &quot;Sst&quot;, &quot;Vip&quot;, &quot;Id2&quot;)
+
+gg_ann &lt;- plotAnnotationByLevels(con$embedding, annotation_by_level, size=0.1, font.size=c(4, 4), shuffle.colors=T,
+                       raster=T, raster.dpi=120, raster.width=4, raster.height=4, build.panel=F)[[2]]
+
+gg_genes &lt;- toupper(p_genes) %&gt;% plotGeneExpression(con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2, 
+                                   raster=T, raster.width=11/4, raster.height=8/3, raster.dpi=100)
+
+c(list(gg_ann), gg_genes) %&gt;% 
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %&gt;% 
+  cowplot::plot_grid(plotlist=., ncol=4, labels=c(&quot;&quot;, p_genes), label_fontface=&quot;italic&quot;, label_x=0.3)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-24-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;main_markers_emb.pdf&quot;), width=11, height=8)</code></pre>
+<pre class="r"><code>p_genes &lt;- c(&quot;Fezf2&quot;, &quot;Lrrk1&quot;, &quot;Tle4&quot;)
+p_emb &lt;- annotation_by_level %$% names(l1)[l1 == &quot;Excitatory&quot;] %&gt;% con$embedding[.,]
+p_xlims &lt;- quantile(p_emb[,1], c(0.01, 0.99)) %&gt;% `+`(diff(.) * c(-0.05, 0.05))
+p_ylims &lt;- quantile(p_emb[,2], c(0.01, 0.99)) %&gt;% `+`(diff(.) * c(-0.05, 0.05))
+
+plotGeneExpression(toupper(p_genes), con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2,
+                   groups=annotation_by_level$l1, subgroups=&quot;Excitatory&quot;,
+                   raster=T, raster.width=8/3, raster.height=8/3, raster.dpi=100) %&gt;% 
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %&gt;% 
+  lapply(`+`, lims(x=p_xlims, y=p_ylims)) %&gt;%
+  cowplot::plot_grid(plotlist=., nrow=1, labels=p_genes, label_fontface=&quot;italic&quot;)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-25-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;ex_markers_emb.pdf&quot;), width=8, height=8/3)</code></pre>
+<pre class="r"><code>p_genes &lt;- c(&quot;Id2&quot;, &quot;Lamp5&quot;)
+p_emb &lt;- annotation_by_level %$% names(l1)[l1 == &quot;Inhibitory&quot;] %&gt;% con$embedding[.,]
+p_xlims &lt;- quantile(p_emb[,1], c(0.01, 0.99)) %&gt;% `+`(diff(.) * c(-0.05, 0.05))
+p_ylims &lt;- quantile(p_emb[,2], c(0.01, 0.99)) %&gt;% `+`(diff(.) * c(-0.05, 0.05))
+
+plotGeneExpression(toupper(p_genes), con$embedding, cm_merged, build.panel=F, size=0.1, alpha=0.2,
+                   groups=annotation_by_level$l1, subgroups=&quot;Inhibitory&quot;,
+                   raster=T, raster.width=8/3, raster.height=8/3, raster.dpi=100) %&gt;%
+  lapply(`+`, theme(axis.title=element_blank(), plot.title=element_blank(), plot.margin=margin())) %&gt;% 
+  lapply(`+`, lims(x=p_xlims, y=p_ylims)) %&gt;%
+  cowplot::plot_grid(plotlist=., nrow=1, labels=p_genes, label_fontface=&quot;italic&quot;)</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-26-1.png" width="511.68" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(outPath(&quot;inh_markers_emb.pdf&quot;), width=2*8/3, height=8/3)</code></pre>
+</div>
+<div id="key-marker-levels" class="section level3">
+<h3>Key marker levels</h3>
+<pre class="r"><code>con_filt &lt;- read_rds(CachePath(&quot;con_filt_samples.rds&quot;))</code></pre>
+<pre class="r"><code>p_dfs &lt;- c(&quot;CNR1&quot;, &quot;GAD1&quot;, &quot;GAD2&quot;) %&gt;% 
+  prepareExpressionDfs(con_filt$samples, annotation, neuron.types=neuron_type_per_type, 
+                       condition.per.sample=condition_per_sample)
+
+ggs &lt;- lapply(p_dfs, averageGeneDfBySamples) %&gt;% lapply(plotExpressionAveraged, text.size=10) %&gt;% 
+  lapply(`[[`, 1) %&gt;% 
+  lapply(`+`, theme(legend.title=element_blank(), legend.position=c(1, 1.03), 
+                    legend.justification=c(1, 1), legend.box.background=element_blank())) %&gt;% 
+  lapply(`+`, scale_color_manual(values=c(&quot;#0571b0&quot;, &quot;#ca0020&quot;)))
+
+ggs &lt;- names(ggs) %&gt;% setNames(., .) %&gt;% lapply(function(n) 
+  ggs[[n]] + ggplot2::annotate(&quot;Text&quot;, x=1, y=0.9, label=n, vjust=1, hjust=0))
+
+for (n in names(ggs)) {
+  ggsave(outPath(paste0(&quot;gene_&quot;, n, &quot;.pdf&quot;)), ggs[[n]], width=6, height=4)
+}
+
+ggs</code></pre>
+<pre><code>$CNR1</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-28-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre><code>
+$GAD1</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-28-2.png" width="576" style="display: block; margin: auto;" /></p>
+<pre><code>
+$GAD2</code></pre>
+<p><img src="figure/fig_overview.Rmd/unnamed-chunk-28-3.png" width="576" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>data.frame(value=unlist(sessioninfo::platform_info()))</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>version</td>
+<td align="left">R version 3.5.1 (2018-07-02)</td>
+</tr>
+<tr class="even">
+<td>os</td>
+<td align="left">Ubuntu 18.04.2 LTS</td>
+</tr>
+<tr class="odd">
+<td>system</td>
+<td align="left">x86_64, linux-gnu</td>
+</tr>
+<tr class="even">
+<td>ui</td>
+<td align="left">X11</td>
+</tr>
+<tr class="odd">
+<td>language</td>
+<td align="left">(EN)</td>
+</tr>
+<tr class="even">
+<td>collate</td>
+<td align="left">en_US.UTF-8</td>
+</tr>
+<tr class="odd">
+<td>ctype</td>
+<td align="left">en_US.UTF-8</td>
+</tr>
+<tr class="even">
+<td>tz</td>
+<td align="left">America/New_York</td>
+</tr>
+<tr class="odd">
+<td>date</td>
+<td align="left">2020-07-08</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>as.data.frame(sessioninfo::package_info())[c(&#39;package&#39;, &#39;loadedversion&#39;, &#39;date&#39;, &#39;source&#39;)]</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">package</th>
+<th align="left">loadedversion</th>
+<th align="left">date</th>
+<th align="left">source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AnnotationDbi</td>
+<td align="left">AnnotationDbi</td>
+<td align="left">1.44.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>ape</td>
+<td align="left">ape</td>
+<td align="left">5.3</td>
+<td align="left">2019-03-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>assertthat</td>
+<td align="left">assertthat</td>
+<td align="left">0.2.1</td>
+<td align="left">2019-03-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>backports</td>
+<td align="left">backports</td>
+<td align="left">1.1.5</td>
+<td align="left">2019-10-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>base64enc</td>
+<td align="left">base64enc</td>
+<td align="left">0.1-3</td>
+<td align="left">2015-07-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>beeswarm</td>
+<td align="left">beeswarm</td>
+<td align="left">0.2.3</td>
+<td align="left">2016-04-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Biobase</td>
+<td align="left">Biobase</td>
+<td align="left">2.42.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>BiocGenerics</td>
+<td align="left">BiocGenerics</td>
+<td align="left">0.28.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>BiocManager</td>
+<td align="left">BiocManager</td>
+<td align="left">1.30.10</td>
+<td align="left">2019-11-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>bit</td>
+<td align="left">bit</td>
+<td align="left">1.1-15.2</td>
+<td align="left">2020-02-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>bit64</td>
+<td align="left">bit64</td>
+<td align="left">0.9-7</td>
+<td align="left">2017-05-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>blob</td>
+<td align="left">blob</td>
+<td align="left">1.2.1</td>
+<td align="left">2020-01-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>brew</td>
+<td align="left">brew</td>
+<td align="left">1.0-6</td>
+<td align="left">2011-04-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>broom</td>
+<td align="left">broom</td>
+<td align="left">0.5.5</td>
+<td align="left">2020-02-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Cairo</td>
+<td align="left">Cairo</td>
+<td align="left">1.5-11</td>
+<td align="left">2020-03-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>callr</td>
+<td align="left">callr</td>
+<td align="left">3.4.2</td>
+<td align="left">2020-02-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>CellAnnotatoR</td>
+<td align="left">CellAnnotatoR</td>
+<td align="left">0.2.0</td>
+<td align="left">2020-05-12</td>
+<td align="left">Github (<a href="mailto:khodosevichlab/CellAnnotatoR@dde7b22" class="email">khodosevichlab/CellAnnotatoR@dde7b22</a>)</td>
+</tr>
+<tr class="even">
+<td>cellranger</td>
+<td align="left">cellranger</td>
+<td align="left">1.1.0</td>
+<td align="left">2016-07-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>cli</td>
+<td align="left">cli</td>
+<td align="left">2.0.2</td>
+<td align="left">2020-02-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>colorspace</td>
+<td align="left">colorspace</td>
+<td align="left">1.4-1</td>
+<td align="left">2019-03-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>conos</td>
+<td align="left">conos</td>
+<td align="left">1.3.0</td>
+<td align="left">2020-05-12</td>
+<td align="left">local</td>
+</tr>
+<tr class="even">
+<td>cowplot</td>
+<td align="left">cowplot</td>
+<td align="left">1.0.0</td>
+<td align="left">2019-07-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>crayon</td>
+<td align="left">crayon</td>
+<td align="left">1.3.4</td>
+<td align="left">2017-09-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>data.table</td>
+<td align="left">data.table</td>
+<td align="left">1.12.8</td>
+<td align="left">2019-12-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>dataorganizer</td>
+<td align="left">dataorganizer</td>
+<td align="left">0.1.0</td>
+<td align="left">2019-11-08</td>
+<td align="left">local</td>
+</tr>
+<tr class="even">
+<td>DBI</td>
+<td align="left">DBI</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-12-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>dbplyr</td>
+<td align="left">dbplyr</td>
+<td align="left">1.4.2</td>
+<td align="left">2019-06-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>dendextend</td>
+<td align="left">dendextend</td>
+<td align="left">1.13.4</td>
+<td align="left">2020-02-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>desc</td>
+<td align="left">desc</td>
+<td align="left">1.2.0</td>
+<td align="left">2018-05-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>devtools</td>
+<td align="left">devtools</td>
+<td align="left">2.2.2</td>
+<td align="left">2020-02-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>digest</td>
+<td align="left">digest</td>
+<td align="left">0.6.25</td>
+<td align="left">2020-02-23</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>dplyr</td>
+<td align="left">dplyr</td>
+<td align="left">0.8.5</td>
+<td align="left">2020-03-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>ellipsis</td>
+<td align="left">ellipsis</td>
+<td align="left">0.3.0</td>
+<td align="left">2019-09-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>Epilepsy19</td>
+<td align="left">Epilepsy19</td>
+<td align="left">0.0.0.9000</td>
+<td align="left">2019-10-15</td>
+<td align="left">local</td>
+</tr>
+<tr class="odd">
+<td>evaluate</td>
+<td align="left">evaluate</td>
+<td align="left">0.14</td>
+<td align="left">2019-05-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>fansi</td>
+<td align="left">fansi</td>
+<td align="left">0.4.1</td>
+<td align="left">2020-01-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>farver</td>
+<td align="left">farver</td>
+<td align="left">2.0.3</td>
+<td align="left">2020-01-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>fastmap</td>
+<td align="left">fastmap</td>
+<td align="left">1.0.1</td>
+<td align="left">2019-10-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>forcats</td>
+<td align="left">forcats</td>
+<td align="left">0.5.0</td>
+<td align="left">2020-03-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>fs</td>
+<td align="left">fs</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-03-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>generics</td>
+<td align="left">generics</td>
+<td align="left">0.0.2</td>
+<td align="left">2018-11-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ggbeeswarm</td>
+<td align="left">ggbeeswarm</td>
+<td align="left">0.6.0</td>
+<td align="left">2018-10-16</td>
+<td align="left">Github (<a href="mailto:eclarke/ggbeeswarm@fb85521" class="email">eclarke/ggbeeswarm@fb85521</a>)</td>
+</tr>
+<tr class="odd">
+<td>ggplot2</td>
+<td align="left">ggplot2</td>
+<td align="left">3.3.0</td>
+<td align="left">2020-03-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ggrastr</td>
+<td align="left">ggrastr</td>
+<td align="left">0.1.7</td>
+<td align="left">2018-12-04</td>
+<td align="left">Github (<a href="mailto:VPetukhov/ggrastr@203d5cc" class="email">VPetukhov/ggrastr@203d5cc</a>)</td>
+</tr>
+<tr class="odd">
+<td>ggrepel</td>
+<td align="left">ggrepel</td>
+<td align="left">0.8.2</td>
+<td align="left">2020-03-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ggtree</td>
+<td align="left">ggtree</td>
+<td align="left">1.99.1</td>
+<td align="left">2019-10-18</td>
+<td align="left">Github (<a href="mailto:YuLab-SMU/ggtree@e8f6f87" class="email">YuLab-SMU/ggtree@e8f6f87</a>)</td>
+</tr>
+<tr class="odd">
+<td>git2r</td>
+<td align="left">git2r</td>
+<td align="left">0.26.1</td>
+<td align="left">2019-06-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>glue</td>
+<td align="left">glue</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-03-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>gridExtra</td>
+<td align="left">gridExtra</td>
+<td align="left">2.3</td>
+<td align="left">2017-09-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>gtable</td>
+<td align="left">gtable</td>
+<td align="left">0.3.0</td>
+<td align="left">2019-03-25</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>haven</td>
+<td align="left">haven</td>
+<td align="left">2.2.0</td>
+<td align="left">2019-11-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>highr</td>
+<td align="left">highr</td>
+<td align="left">0.8</td>
+<td align="left">2019-03-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>hms</td>
+<td align="left">hms</td>
+<td align="left">0.5.3</td>
+<td align="left">2020-01-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>htmltools</td>
+<td align="left">htmltools</td>
+<td align="left">0.4.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>httpuv</td>
+<td align="left">httpuv</td>
+<td align="left">1.5.2</td>
+<td align="left">2019-09-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>httr</td>
+<td align="left">httr</td>
+<td align="left">1.4.1</td>
+<td align="left">2019-08-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>igraph</td>
+<td align="left">igraph</td>
+<td align="left">1.2.4.2</td>
+<td align="left">2019-11-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>IRanges</td>
+<td align="left">IRanges</td>
+<td align="left">2.16.0</td>
+<td align="left">2018-10-30</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>irlba</td>
+<td align="left">irlba</td>
+<td align="left">2.3.3</td>
+<td align="left">2019-02-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>jsonlite</td>
+<td align="left">jsonlite</td>
+<td align="left">1.6.1</td>
+<td align="left">2020-02-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>knitr</td>
+<td align="left">knitr</td>
+<td align="left">1.28</td>
+<td align="left">2020-02-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>labeling</td>
+<td align="left">labeling</td>
+<td align="left">0.3</td>
+<td align="left">2014-08-23</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>later</td>
+<td align="left">later</td>
+<td align="left">1.0.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>lattice</td>
+<td align="left">lattice</td>
+<td align="left">0.20-40</td>
+<td align="left">2020-02-19</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>lazyeval</td>
+<td align="left">lazyeval</td>
+<td align="left">0.2.2</td>
+<td align="left">2019-03-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>lifecycle</td>
+<td align="left">lifecycle</td>
+<td align="left">0.2.0</td>
+<td align="left">2020-03-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>lubridate</td>
+<td align="left">lubridate</td>
+<td align="left">1.7.4</td>
+<td align="left">2018-04-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>magrittr</td>
+<td align="left">magrittr</td>
+<td align="left">1.5</td>
+<td align="left">2014-11-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>MASS</td>
+<td align="left">MASS</td>
+<td align="left">7.3-51.5</td>
+<td align="left">2019-12-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>Matrix</td>
+<td align="left">Matrix</td>
+<td align="left">1.2-18</td>
+<td align="left">2019-11-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>memoise</td>
+<td align="left">memoise</td>
+<td align="left">1.1.0</td>
+<td align="left">2017-04-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>mime</td>
+<td align="left">mime</td>
+<td align="left">0.9</td>
+<td align="left">2020-02-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>modelr</td>
+<td align="left">modelr</td>
+<td align="left">0.1.6</td>
+<td align="left">2020-02-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>munsell</td>
+<td align="left">munsell</td>
+<td align="left">0.5.0</td>
+<td align="left">2018-06-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>nlme</td>
+<td align="left">nlme</td>
+<td align="left">3.1-145</td>
+<td align="left">2020-03-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>org.Hs.eg.db</td>
+<td align="left">org.Hs.eg.db</td>
+<td align="left">3.7.0</td>
+<td align="left">2019-10-08</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="odd">
+<td>pagoda2</td>
+<td align="left">pagoda2</td>
+<td align="left">0.1.1</td>
+<td align="left">2019-12-10</td>
+<td align="left">local</td>
+</tr>
+<tr class="even">
+<td>pbapply</td>
+<td align="left">pbapply</td>
+<td align="left">1.4-2</td>
+<td align="left">2019-08-31</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pheatmap</td>
+<td align="left">pheatmap</td>
+<td align="left">1.0.12</td>
+<td align="left">2019-01-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>pillar</td>
+<td align="left">pillar</td>
+<td align="left">1.4.3</td>
+<td align="left">2019-12-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pkgbuild</td>
+<td align="left">pkgbuild</td>
+<td align="left">1.0.6</td>
+<td align="left">2019-10-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>pkgconfig</td>
+<td align="left">pkgconfig</td>
+<td align="left">2.0.3</td>
+<td align="left">2019-09-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>pkgload</td>
+<td align="left">pkgload</td>
+<td align="left">1.0.2</td>
+<td align="left">2018-10-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>plyr</td>
+<td align="left">plyr</td>
+<td align="left">1.8.6</td>
+<td align="left">2020-03-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>prettyunits</td>
+<td align="left">prettyunits</td>
+<td align="left">1.1.1</td>
+<td align="left">2020-01-24</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>processx</td>
+<td align="left">processx</td>
+<td align="left">3.4.2</td>
+<td align="left">2020-02-09</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>promises</td>
+<td align="left">promises</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-10-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>ps</td>
+<td align="left">ps</td>
+<td align="left">1.3.2</td>
+<td align="left">2020-02-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>purrr</td>
+<td align="left">purrr</td>
+<td align="left">0.3.3</td>
+<td align="left">2019-10-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>R6</td>
+<td align="left">R6</td>
+<td align="left">2.4.1</td>
+<td align="left">2019-11-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>RColorBrewer</td>
+<td align="left">RColorBrewer</td>
+<td align="left">1.1-2</td>
+<td align="left">2014-12-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>Rcpp</td>
+<td align="left">Rcpp</td>
+<td align="left">1.0.4</td>
+<td align="left">2020-03-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>readr</td>
+<td align="left">readr</td>
+<td align="left">1.3.1</td>
+<td align="left">2018-12-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>readxl</td>
+<td align="left">readxl</td>
+<td align="left">1.3.1</td>
+<td align="left">2019-03-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>remotes</td>
+<td align="left">remotes</td>
+<td align="left">2.1.1</td>
+<td align="left">2020-02-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>reprex</td>
+<td align="left">reprex</td>
+<td align="left">0.3.0</td>
+<td align="left">2019-05-16</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>reshape2</td>
+<td align="left">reshape2</td>
+<td align="left">1.4.3</td>
+<td align="left">2017-12-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rjson</td>
+<td align="left">rjson</td>
+<td align="left">0.2.20</td>
+<td align="left">2018-06-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>rlang</td>
+<td align="left">rlang</td>
+<td align="left">0.4.5</td>
+<td align="left">2020-03-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rmarkdown</td>
+<td align="left">rmarkdown</td>
+<td align="left">2.1</td>
+<td align="left">2020-01-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>Rook</td>
+<td align="left">Rook</td>
+<td align="left">1.1-1</td>
+<td align="left">2014-10-20</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rprojroot</td>
+<td align="left">rprojroot</td>
+<td align="left">1.3-2</td>
+<td align="left">2018-01-03</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>RSQLite</td>
+<td align="left">RSQLite</td>
+<td align="left">2.2.0</td>
+<td align="left">2020-01-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rstudioapi</td>
+<td align="left">rstudioapi</td>
+<td align="left">0.11</td>
+<td align="left">2020-02-07</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>rvcheck</td>
+<td align="left">rvcheck</td>
+<td align="left">0.1.8</td>
+<td align="left">2020-03-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>rvest</td>
+<td align="left">rvest</td>
+<td align="left">0.3.5</td>
+<td align="left">2019-11-08</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>S4Vectors</td>
+<td align="left">S4Vectors</td>
+<td align="left">0.20.1</td>
+<td align="left">2018-11-09</td>
+<td align="left">Bioconductor</td>
+</tr>
+<tr class="even">
+<td>scales</td>
+<td align="left">scales</td>
+<td align="left">1.1.0</td>
+<td align="left">2019-11-18</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>sccore</td>
+<td align="left">sccore</td>
+<td align="left">0.1</td>
+<td align="left">2020-04-24</td>
+<td align="left">Github (<a href="mailto:hms-dbmi/sccore@2b34b61" class="email">hms-dbmi/sccore@2b34b61</a>)</td>
+</tr>
+<tr class="even">
+<td>sessioninfo</td>
+<td align="left">sessioninfo</td>
+<td align="left">1.1.1</td>
+<td align="left">2018-11-05</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>shiny</td>
+<td align="left">shiny</td>
+<td align="left">1.4.0.2</td>
+<td align="left">2020-03-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>stringi</td>
+<td align="left">stringi</td>
+<td align="left">1.4.6</td>
+<td align="left">2020-02-17</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>stringr</td>
+<td align="left">stringr</td>
+<td align="left">1.4.0</td>
+<td align="left">2019-02-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>testthat</td>
+<td align="left">testthat</td>
+<td align="left">2.3.2</td>
+<td align="left">2020-03-02</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>tibble</td>
+<td align="left">tibble</td>
+<td align="left">2.1.3</td>
+<td align="left">2019-06-06</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>tidyr</td>
+<td align="left">tidyr</td>
+<td align="left">1.0.2</td>
+<td align="left">2020-01-24</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>tidyselect</td>
+<td align="left">tidyselect</td>
+<td align="left">1.0.0</td>
+<td align="left">2020-01-27</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>tidytree</td>
+<td align="left">tidytree</td>
+<td align="left">0.3.2</td>
+<td align="left">2020-03-12</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>tidyverse</td>
+<td align="left">tidyverse</td>
+<td align="left">1.3.0</td>
+<td align="left">2019-11-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>treeio</td>
+<td align="left">treeio</td>
+<td align="left">1.9.3</td>
+<td align="left">2019-10-18</td>
+<td align="left">Github (<a href="mailto:GuangchuangYu/treeio@4a1c993" class="email">GuangchuangYu/treeio@4a1c993</a>)</td>
+</tr>
+<tr class="odd">
+<td>triebeard</td>
+<td align="left">triebeard</td>
+<td align="left">0.3.0</td>
+<td align="left">2016-08-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>urltools</td>
+<td align="left">urltools</td>
+<td align="left">1.7.3</td>
+<td align="left">2019-04-14</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>usethis</td>
+<td align="left">usethis</td>
+<td align="left">1.5.1</td>
+<td align="left">2019-07-04</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>vctrs</td>
+<td align="left">vctrs</td>
+<td align="left">0.2.4</td>
+<td align="left">2020-03-10</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>vipor</td>
+<td align="left">vipor</td>
+<td align="left">0.4.5</td>
+<td align="left">2017-03-22</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>viridis</td>
+<td align="left">viridis</td>
+<td align="left">0.5.1</td>
+<td align="left">2018-03-29</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>viridisLite</td>
+<td align="left">viridisLite</td>
+<td align="left">0.3.0</td>
+<td align="left">2018-02-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>whisker</td>
+<td align="left">whisker</td>
+<td align="left">0.4</td>
+<td align="left">2019-08-28</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>withr</td>
+<td align="left">withr</td>
+<td align="left">2.1.2</td>
+<td align="left">2018-03-15</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>workflowr</td>
+<td align="left">workflowr</td>
+<td align="left">1.6.1</td>
+<td align="left">2020-03-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>xfun</td>
+<td align="left">xfun</td>
+<td align="left">0.12</td>
+<td align="left">2020-01-13</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>xml2</td>
+<td align="left">xml2</td>
+<td align="left">1.2.5</td>
+<td align="left">2020-03-11</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="odd">
+<td>xtable</td>
+<td align="left">xtable</td>
+<td align="left">1.8-4</td>
+<td align="left">2019-04-21</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+<tr class="even">
+<td>yaml</td>
+<td align="left">yaml</td>
+<td align="left">2.2.1</td>
+<td align="left">2020-02-01</td>
+<td align="left">CRAN (R 3.5.1)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
