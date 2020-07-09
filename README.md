@@ -3,6 +3,7 @@ Analysis for the Epilepsy paper
 
 To see the compiled notebooks, please visit [the website](https://khodosevichlab.github.io/Epilepsy19/).
 
+The raw notebooks:
 - Pre-processing
   - [Raw data filtering](./analysis/prep_filtration.Rmd)
   - [Alignment of the datasets](./analysis/prep_alignment.Rmd)
