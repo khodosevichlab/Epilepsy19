@@ -8,4 +8,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+
+Table of content:
+
+- Pre-processing
+  - [Raw data filtering](./prep_filtration.html)
+  - [Alignment of the datasets](./prep_alignment.html)
+- Analyses
+  - [Overview of the datasets](./fig_overview.html)
+  - [Distances between cell types](./fig_type_distance.html)
+  - [Differential Expression and Gene Ontology analyses](./fig_go.html)
+  - [Cell Type prioritization summary](./fig_summary.html)
+  - [Comparison to Smart-Seq2 and Allen Brain Institute data](./fig_smart_seq.html)
