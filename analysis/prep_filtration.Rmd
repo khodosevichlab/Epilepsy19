@@ -111,3 +111,82 @@ sapply(cms_filt, ncol) %>% .[names(.) != "NeuN"] %>% sum()
 readr::write_rds(cms_filt, CachePath("count_matrices.rds"))
 ```
 
+## Plot the doublet UMAP
+
+**Note**: this part requires annotation, so it was run separately after performing annotation of the filtered data
+
+```{r}
+cms_renamed <- names(cms) %>% setNames(., .) %>% 
+  lapply(function(n) set_colnames(cms[[n]], paste0(n, "_", colnames(cms[[n]]))))
+```
+
+```{r}
+p2s <- lapply(cms_renamed, function(cm) cm %>% set_rownames(make.unique(rownames(.))) %>% 
+                GetPagoda(clustering.type=NULL, embeding.type=NULL, build.graph=FALSE))
+```
+
+```{r}
+con <- conos::Conos$new(p2s, n.cores=30)
+con$buildGraph(k=50, k.self=5, k.self.weight=0.1)
+con$embedGraph(method="UMAP", n.cores=45, min.prob.lower=1e-5, n.neighbors=30, 
+               n.epochs=1000, spread=5, min.dist=1.0, verbose=T)
+```
+
+```{r, message=FALSE}
+annotation <- readr::read_csv(MetadataPath("annotation.csv")) %$%
+  setNames(l4, cell)
+
+is_doublet_plt <- names(is_doublet) %>% lapply(function(n) 
+  is_doublet[[n]] %>% setNames(paste0(n, "_", names(.)))) %>% 
+  Reduce(c, .)
+
+doublet_score_plt <- names(doublet_info) %>% lapply(function(n) 
+  doublet_info[[n]]$score %>% setNames(paste0(n, "_", names(.)))) %>% 
+  Reduce(c, .)
+```
+
+```{r, fig.width=7, fig.height=7}
+gg_annot <- con$plotGraph(groups=annotation, shuffle.colors=T, raster=T)
+color_scale <- scale_color_manual(values=c("#00913f", "#910000"))
+
+gg_annot
+ggsave(OutputPath("fig_filtration", "annotation.pdf"))
+
+is_excluded <-setNames(!(names(con$getDatasetPerCell()) %in% names(annotation)), names(con$getDatasetPerCell()))
+con$plotGraph(groups=is_excluded, mark.groups=F, show.legend=T, legend.pos=c(1, 1), size=0.1, alpha=0.2, raster=T) +
+  gg_annot$layers[[2]] +
+  scale_size_continuous(range=c(3, 5), trans='identity', guide='none') +
+  guides(color=guide_legend(override.aes=list(size=3, alpha=1), title="Is excluded")) +
+  color_scale
+
+ggsave(OutputPath("fig_filtration", "excluded.pdf"))
+
+con$plotGraph(groups=is_doublet_plt, mark.groups=F, show.legend=T, legend.pos=c(1, 1), size=0.1, alpha=0.2, raster=T) +
+  gg_annot$layers[[2]] +
+  scale_size_continuous(range=c(3, 5), trans='identity', guide='none') +
+  guides(color=guide_legend(override.aes=list(size=3, alpha=1), title="Is doublet")) +
+  color_scale
+
+ggsave(OutputPath("fig_filtration", "doublets.pdf"))
+
+con$plotGraph(colors=doublet_score_plt, show.legend=T, legend.title="Doublet score", legend.pos=c(1, 1), raster=T) +
+  gg_annot$layers[[2]] +
+  scale_size_continuous(range=c(3, 5), trans='identity', guide='none')
+
+ggsave(OutputPath("fig_filtration", "doublet_scores.pdf"))
+```
+
+```{r, message=FALSE}
+samp_aliases <- readr::read_csv(MetadataPath("sample_info.csv")) %$% setNames(Alias, Name) %>% c(NeuN="NeuNNeg")
+doublet_frac <- sapply(is_doublet, mean)
+excluded_frac <- split(is_excluded, con$getDatasetPerCell()[names(is_excluded)]) %>% sapply(mean)
+excluded_frac["NeuN"] <- NA
+
+doublet_report_df <- tibble(Sample=samp_aliases[names(doublet_frac)], `Doublet Fraction`=round(doublet_frac, 3), 
+                            `Excluded Fraction`=round(excluded_frac[names(doublet_frac)], 3), `Doublet Threshold`=0.25)
+
+readr::write_csv(doublet_report_df, OutputPath("fig_filtration", "doublet_report.csv"))
+
+doublet_report_df
+```
+
