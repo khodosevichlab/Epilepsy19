@@ -29,9 +29,10 @@ To see the compiled notebooks, please visit [the website](https://khodosevichlab
 
 ## Data, used for analysis
 
-Conos objects:
+Conos objects and filtered count matrices (must be saved into the [`cache`](./cache) folder):
 - [con_filt_cells.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/con_filt_cells.rds): alignment of all neuronal cells
 - [con_filt_samples.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/con_filt_samples.rds): 3 bad samples removed from the analysis
+- [count_matrices.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/count_matrices.rds): filtered count matrices
 
 Relevant meta-data:
 - [CellAnnotatoR-compatible list of marker genes](./metadata/neuron_markers.txt)
