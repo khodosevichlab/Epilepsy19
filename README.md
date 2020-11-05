@@ -1,5 +1,5 @@
 # Epilepsy19
-Analysis for the Epilepsy paper
+Analysis for the [Identification of epilepsy-associated neuronal subtypes and gene expression underlying epileptogenesis](https://doi.org/10.1038/s41467-020-18752-7) paper.
 
 To see the compiled notebooks, please visit [the website](https://khodosevichlab.github.io/Epilepsy19/).
 
@@ -48,3 +48,9 @@ Before running the analyses, create the necessary folders
 mkdir -p output/overview output/fig_type_diff output/fig_go/gene_scattermaps output/fig_go/pathway_clustering output/total_ranking output/fig_neun output/fig_smart_seq
 ```
 -->
+
+## Citation
+
+If you used this code for your analysis, please cite the paper:
+
+> Pfisterer, U., Petukhov, V., Demharter, S. et al. Identification of epilepsy-associated neuronal subtypes and gene expression underlying epileptogenesis. Nat Commun 11, 5038 (2020). https://doi.org/10.1038/s41467-020-18752-7
