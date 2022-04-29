@@ -33,7 +33,9 @@ Conos objects and filtered count matrices (must be saved into the [`cache`](./ca
 - [con_filt_cells.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/con_filt_cells.rds): alignment of all neuronal cells
 - [con_filt_samples.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/con_filt_samples.rds): 3 bad samples removed from the analysis
 - [count_matrices.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/count_matrices.rds): filtered count matrices
-- [cms_raw.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/cms_raw.rds): raw count matrices (as they were loaded in the second chunk of [the pre-processing notebook](https://khodosevichlab.github.io/Epilepsy19/prep_filtration.html))
+
+Additional data:
+- [cms_raw.rds](http://pklab.med.harvard.edu/viktor/publications/Epilepsy19/cms_raw.rds): raw count matrices (as they were loaded in chunks [2](https://github.com/khodosevichlab/Epilepsy19/blob/611a4eb5c893d273258c56717d0682747db65d2f/analysis/prep_filtration.Rmd#L23) and [5](https://github.com/khodosevichlab/Epilepsy19/blob/611a4eb5c893d273258c56717d0682747db65d2f/analysis/prep_filtration.Rmd#L51) of [the pre-processing notebook](https://khodosevichlab.github.io/Epilepsy19/prep_filtration.html))
 
 Relevant meta-data:
 - [CellAnnotatoR-compatible list of marker genes](./metadata/neuron_markers.txt)
